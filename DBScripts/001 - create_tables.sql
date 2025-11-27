@@ -12,3 +12,10 @@ CREATE TABLE BraniSuonati (
     BranoSuonatoIl DATE NOT NULL,
     FOREIGN KEY (IdBrano) REFERENCES Brani(Id) ON DELETE CASCADE
 );
+
+-- Creazione della tabella Utenti
+CREATE TABLE Utenti (
+    Id INT PRIMARY KEY AUTO_INCREMENT,
+    Username VARCHAR(255) UNIQUE NOT NULL,
+    Password VARCHAR(255) NOT NULL
+);

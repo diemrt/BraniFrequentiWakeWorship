@@ -4,11 +4,11 @@ require_once 'includes/auth.php';
 
 // Query per ultimi brani suonati negli ultimi venerdì e domenica
 $stmt = $conn->prepare("
-    SELECT b.titolo, b.tipologia, bs.data
+    SELECT b.titolo, b.tipologia, bs.BranoSuonatoIl
     FROM BraniSuonati bs
-    JOIN Brani b ON bs.id_brano = b.id
-    WHERE DAYOFWEEK(bs.data) IN (6, 1)  -- Venerdì=6, Domenica=1
-    ORDER BY bs.data DESC
+    JOIN Brani b ON bs.IdBrano = b.Id
+    WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)  -- Venerdì=6, Domenica=1
+    ORDER BY bs.BranoSuonatoIl DESC
     LIMIT 10
 ");
 $stmt->execute();
@@ -23,7 +23,7 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
         <div class="bg-white p-4 rounded shadow">
             <h2 class="text-xl"><?php echo sanitize($brano['titolo']); ?></h2>
             <p><?php echo sanitize($brano['tipologia']); ?></p>
-            <p><?php echo sanitize($brano['data']); ?></p>
+            <p><?php echo sanitize($brano['BranoSuonatoIl']); ?></p>
         </div>
     <?php endforeach; ?>
 </div>
