@@ -110,6 +110,11 @@ while ($row = $result->fetch_assoc()) {
                     </div>
                 </div>
 
+                <div id="riepilogo" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Brani Selezionati</label>
+                    <div id="badge-container" class="flex flex-wrap gap-2"></div>
+                </div>
+
                 <?php if ($message): ?>
                     <div class="rounded-md p-4 <?php echo strpos($message, 'registrati') !== false ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'; ?>">
                         <div class="flex">
@@ -142,4 +147,46 @@ while ($row = $result->fetch_assoc()) {
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[name="brani[]"]');
+    const riepilogo = document.getElementById('riepilogo');
+    const badgeContainer = document.getElementById('badge-container');
+    
+    function updateRiepilogo() {
+        const selected = Array.from(checkboxes).filter(cb => cb.checked);
+        badgeContainer.innerHTML = '';
+        if (selected.length > 0) {
+            riepilogo.classList.remove('hidden');
+            selected.forEach(cb => {
+                const id = cb.value;
+                const label = document.querySelector(`label[for="brano_${id}"]`);
+                const titolo = label ? label.textContent.trim() : `Brano ${id}`;
+                const badge = document.createElement('span');
+                badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800';
+                badge.innerHTML = `${titolo} <button type="button" class="ml-2 text-orange-600 hover:text-orange-800" data-id="${id}">&times;</button>`;
+                badgeContainer.appendChild(badge);
+            });
+        } else {
+            riepilogo.classList.add('hidden');
+        }
+    }
+    
+    checkboxes.forEach(cb => cb.addEventListener('change', updateRiepilogo));
+    
+    badgeContainer.addEventListener('click', function(e) {
+        if (e.target.tagName === 'BUTTON') {
+            const id = e.target.getAttribute('data-id');
+            const cb = document.getElementById(`brano_${id}`);
+            if (cb) {
+                cb.checked = false;
+                updateRiepilogo();
+            }
+        }
+    });
+    
+    // Initial update
+    updateRiepilogo();
+});
+</script>
 <?php include 'includes/footer.php'; ?>

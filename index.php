@@ -84,6 +84,16 @@ $stmt->bind_param($main_types, ...$main_params);
 $stmt->execute();
 $result = $stmt->get_result();
 $brani = $result->fetch_all(MYSQLI_ASSOC);
+
+// Raggruppa i brani per data
+$grouped = [];
+foreach ($brani as $brano) {
+    $date = $brano['BranoSuonatoIl'];
+    if (!isset($grouped[$date])) {
+        $grouped[$date] = [];
+    }
+    $grouped[$date][] = $brano;
+}
 ?>
 
 <?php include 'includes/header.php'; ?>
@@ -126,26 +136,29 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
             <a href="index.php" class="ml-4 text-gray-600 hover:text-gray-800">Reset</a>
         </div>
     </form>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php foreach ($brani as $brano): ?>
-            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
-                <div class="flex items-center mb-4">
-                    <svg class="w-8 h-8 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                    </svg>
-                    <h2 class="text-xl font-semibold text-gray-800"><?php echo sanitize($brano['titolo']); ?></h2>
-                </div>
-                <p class="text-gray-600 mb-2"><span class="font-medium">Tipologia:</span> <?php echo sanitize($brano['tipologia']); ?></p>
-                <p class="text-gray-500 text-sm"><span class="font-medium">Suonato il:</span> <?php
-                    $date = $brano['BranoSuonatoIl'];
-                    $timestamp = strtotime($date);
-                    $day = date('l', $timestamp);
-                    $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
-                    echo sanitize($date . ' (' . $day_it . ')');
-                ?></p>
+    <?php foreach ($grouped as $date => $brani_per_data): ?>
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4"><?php
+                $timestamp = strtotime($date);
+                $day = date('l', $timestamp);
+                $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
+                echo sanitize($date . ' (' . $day_it . ')');
+            ?></h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php foreach ($brani_per_data as $brano): ?>
+                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
+                        <div class="flex items-center mb-4">
+                            <svg class="w-8 h-8 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                            </svg>
+                            <h2 class="text-xl font-semibold text-gray-800"><?php echo sanitize($brano['titolo']); ?></h2>
+                        </div>
+                        <p class="text-gray-600 mb-2"><span class="font-medium">Tipologia:</span> <?php echo sanitize($brano['tipologia']); ?></p>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
-    </div>
+        </div>
+    <?php endforeach; ?>
     <?php if (empty($brani)): ?>
         <div class="text-center py-12">
             <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
