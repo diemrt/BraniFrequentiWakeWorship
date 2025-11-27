@@ -20,7 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $oggi = new DateTime();
         if ($dateObj && $dateObj >= $oggi && in_array($dateObj->format('N'), ['5', '7'])) { // 5=ven, 7=dom
             if (isset($_POST['brani']) && is_array($_POST['brani'])) {
-                $brani_selezionati = array_map('intval', $_POST['brani']);
+                $checked = array_map('intval', $_POST['brani']);
+                $ordered = isset($_POST['brani_order']) && $_POST['brani_order'] ? array_map('intval', explode(',', $_POST['brani_order'])) : [];
+                $brani_selezionati = array_intersect($ordered, $checked);
                 $stmt_check = $conn->prepare("SELECT Id FROM Brani WHERE Id = ?");
                 $stmt_insert = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl) VALUES (?, ?)");
                 $inseriti = 0;
@@ -84,6 +86,7 @@ while ($row = $result->fetch_assoc()) {
 
             <form method="post" class="space-y-6">
                 <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                <input type="hidden" name="brani_order" id="brani_order" value="">
 
                 <div>
                     <label for="data" class="block text-sm font-medium text-gray-700 mb-2">Data della Scaletta</label>
@@ -148,17 +151,17 @@ while ($row = $result->fetch_assoc()) {
     </div>
 </div>
 <script>
+let selectedOrder = [];
 const checkboxes = document.querySelectorAll('input[name="brani[]"]');
 const riepilogo = document.getElementById('riepilogo');
 const badgeContainer = document.getElementById('badge-container');
 
 function updateRiepilogo() {
-    const selected = Array.from(checkboxes).filter(cb => cb.checked);
     badgeContainer.innerHTML = '';
-    if (selected.length > 0) {
+    document.getElementById('brani_order').value = selectedOrder.join(',');
+    if (selectedOrder.length > 0) {
         riepilogo.classList.remove('hidden');
-        selected.forEach(cb => {
-            const id = cb.value;
+        selectedOrder.forEach(id => {
             const label = document.querySelector(`label[for="brano_${id}"]`);
             const titolo = label ? label.textContent.trim() : `Brano ${id}`;
             const badge = document.createElement('span');
@@ -171,16 +174,25 @@ function updateRiepilogo() {
     }
 }
 
-checkboxes.forEach(cb => cb.addEventListener('change', updateRiepilogo));
+checkboxes.forEach(cb => cb.addEventListener('change', function() {
+    const id = cb.value;
+    if (cb.checked) {
+        if (!selectedOrder.includes(id)) {
+            selectedOrder.push(id);
+        }
+    } else {
+        selectedOrder = selectedOrder.filter(item => item !== id);
+    }
+    updateRiepilogo();
+}));
 
 badgeContainer.addEventListener('click', function(e) {
     if (e.target.tagName === 'BUTTON') {
         const id = e.target.getAttribute('data-id');
+        selectedOrder = selectedOrder.filter(item => item !== id);
         const cb = document.getElementById(`brano_${id}`);
-        if (cb) {
-            cb.checked = false;
-            updateRiepilogo();
-        }
+        if (cb) cb.checked = false;
+        updateRiepilogo();
     }
 });
 
