@@ -25,7 +25,13 @@ $base_query = "
     WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)
 ";
 $count_query = "
-    SELECT COUNT(*)
+    SELECT COUNT(DISTINCT bs.BranoSuonatoIl)
+    FROM BraniSuonati bs
+    JOIN Brani b ON bs.IdBrano = b.Id
+    WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)
+";
+$dates_query = "
+    SELECT DISTINCT bs.BranoSuonatoIl as date_played
     FROM BraniSuonati bs
     JOIN Brani b ON bs.IdBrano = b.Id
     WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)
@@ -36,6 +42,7 @@ $types = '';
 if (!empty($title_search)) {
     $condition = " AND b.titolo LIKE ?";
     $count_query .= $condition;
+    $dates_query .= $condition;
     $base_query .= $condition;
     $params[] = '%' . $title_search . '%';
     $types .= 's';
@@ -43,6 +50,7 @@ if (!empty($title_search)) {
 if (!empty($date_from)) {
     $condition = " AND bs.BranoSuonatoIl >= ?";
     $count_query .= $condition;
+    $dates_query .= $condition;
     $base_query .= $condition;
     $params[] = $date_from;
     $types .= 's';
@@ -50,6 +58,7 @@ if (!empty($date_from)) {
 if (!empty($date_to)) {
     $condition = " AND bs.BranoSuonatoIl <= ?";
     $count_query .= $condition;
+    $dates_query .= $condition;
     $base_query .= $condition;
     $params[] = $date_to;
     $types .= 's';
@@ -58,9 +67,11 @@ if (!empty($date_to)) {
 if ($day_filter == 'venerdi') {
     $base_query = str_replace("IN (6, 1)", "= 6", $base_query);
     $count_query = str_replace("IN (6, 1)", "= 6", $count_query);
+    $dates_query = str_replace("IN (6, 1)", "= 6", $dates_query);
 } elseif ($day_filter == 'dom') {
     $base_query = str_replace("IN (6, 1)", "= 1", $base_query);
     $count_query = str_replace("IN (6, 1)", "= 1", $count_query);
+    $dates_query = str_replace("IN (6, 1)", "= 1", $dates_query);
 }
 $stmt_count = $conn->prepare($count_query);
 if (!empty($params)) {
@@ -68,22 +79,38 @@ if (!empty($params)) {
 }
 $stmt_count->execute();
 $result_count = $stmt_count->get_result();
-$total = $result_count->fetch_row()[0];
-$limit = 10;
-$total_pages = ceil($total / $limit);
+$total_dates = $result_count->fetch_row()[0];
+$limit_dates = 10;
+$total_pages = ceil($total_dates / $limit_dates);
 $page = isset($_GET['page']) ? max(1, min((int)$_GET['page'], $total_pages ?: 1)) : 1;
-$offset = ($page - 1) * $limit;
+$offset_dates = ($page - 1) * $limit_dates;
 
-// Main query
-$main_query = $base_query . " ORDER BY bs.BranoSuonatoIl DESC LIMIT ? OFFSET ?";
-$main_params = array_merge($params, [$limit, $offset]);
-$main_types = $types . 'ii';
+// Get dates for this page
+$dates_query .= " ORDER BY bs.BranoSuonatoIl DESC LIMIT ? OFFSET ?";
+$dates_params = array_merge($params, [$limit_dates, $offset_dates]);
+$dates_types = $types . 'ii';
 
-$stmt = $conn->prepare($main_query);
-$stmt->bind_param($main_types, ...$main_params);
-$stmt->execute();
-$result = $stmt->get_result();
-$brani = $result->fetch_all(MYSQLI_ASSOC);
+$stmt_dates = $conn->prepare($dates_query);
+$stmt_dates->bind_param($dates_types, ...$dates_params);
+$stmt_dates->execute();
+$result_dates = $stmt_dates->get_result();
+$dates = array_column($result_dates->fetch_all(MYSQLI_ASSOC), 'date_played');
+
+// Main query for all records in these dates
+if (!empty($dates)) {
+    $placeholders = str_repeat('?,', count($dates) - 1) . '?';
+    $main_query = $base_query . " AND bs.BranoSuonatoIl IN ($placeholders) ORDER BY bs.BranoSuonatoIl DESC";
+    $main_params = array_merge($params, $dates);
+    $main_types = $types . str_repeat('s', count($dates));
+
+    $stmt = $conn->prepare($main_query);
+    $stmt->bind_param($main_types, ...$main_params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $brani = $result->fetch_all(MYSQLI_ASSOC);
+} else {
+    $brani = [];
+}
 
 // Raggruppa i brani per data
 $grouped = [];
