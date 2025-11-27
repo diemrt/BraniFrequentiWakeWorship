@@ -12,6 +12,7 @@ function login($username, $password) {
 }
 
 function logout() {
+    $_SESSION = array();
     session_destroy();
 }
 

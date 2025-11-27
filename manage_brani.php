@@ -30,34 +30,34 @@ if (isset($_GET['delete'])) {
     } else {
         $message = 'Impossibile eliminare, associato a registrazioni';
     }
-    header('Location: manage_brani.php?page=' . $page);
-    exit;
 }
 
-if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-    $message = 'Token CSRF invalido';
-} elseif (isset($_POST['add'])) {
-    $titolo = sanitize($_POST['titolo']);
-    $tipologia = sanitize($_POST['tipologia']);
-    if (!empty($titolo) && in_array($tipologia, ['Lode', 'Adorazione'])) {
-        $stmt = $conn->prepare("INSERT INTO Brani (titolo, tipologia) VALUES (?, ?)");
-        $stmt->bind_param('ss', $titolo, $tipologia);
-        $stmt->execute();
-        $message = 'Brano aggiunto';
-    } else {
-        $message = 'Dati invalidi';
-    }
-} elseif (isset($_POST['edit'])) {
-    $id = (int)$_POST['id'];
-    $titolo = sanitize($_POST['titolo']);
-    $tipologia = sanitize($_POST['tipologia']);
-    if (!empty($titolo) && in_array($tipologia, ['Lode', 'Adorazione'])) {
-        $stmt = $conn->prepare("UPDATE Brani SET titolo = ?, tipologia = ? WHERE id = ?");
-        $stmt->bind_param('ssi', $titolo, $tipologia, $id);
-        $stmt->execute();
-        $message = 'Brano aggiornato';
-    } else {
-        $message = 'Dati invalidi';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $message = 'Token CSRF invalido';
+    } elseif (isset($_POST['add'])) {
+        $titolo = sanitize($_POST['titolo']);
+        $tipologia = sanitize($_POST['tipologia']);
+        if (!empty($titolo) && in_array($tipologia, ['Lode', 'Adorazione'])) {
+            $stmt = $conn->prepare("INSERT INTO Brani (titolo, tipologia) VALUES (?, ?)");
+            $stmt->bind_param('ss', $titolo, $tipologia);
+            $stmt->execute();
+            $message = 'Brano aggiunto';
+        } else {
+            $message = 'Dati invalidi';
+        }
+    } elseif (isset($_POST['edit'])) {
+        $id = (int)$_POST['id'];
+        $titolo = sanitize($_POST['titolo']);
+        $tipologia = sanitize($_POST['tipologia']);
+        if (!empty($titolo) && in_array($tipologia, ['Lode', 'Adorazione'])) {
+            $stmt = $conn->prepare("UPDATE Brani SET titolo = ?, tipologia = ? WHERE id = ?");
+            $stmt->bind_param('ssi', $titolo, $tipologia, $id);
+            $stmt->execute();
+            $message = 'Brano aggiornato';
+        } else {
+            $message = 'Dati invalidi';
+        }
     }
 }
 
