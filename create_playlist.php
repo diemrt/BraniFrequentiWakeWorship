@@ -24,15 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ordered = isset($_POST['brani_order']) && $_POST['brani_order'] ? array_map('intval', explode(',', $_POST['brani_order'])) : [];
                 $brani_selezionati = array_intersect($ordered, $checked);
                 $stmt_check = $conn->prepare("SELECT Id FROM Brani WHERE Id = ?");
-                $stmt_insert = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl) VALUES (?, ?)");
+                $stmt_insert = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl, OrdineEsecuzione) VALUES (?, ?, ?)");
                 $inseriti = 0;
+                $ordine = 1;
                 foreach ($brani_selezionati as $id_brano) {
                     $stmt_check->bind_param('i', $id_brano);
                     $stmt_check->execute();
                     if ($stmt_check->get_result()->num_rows > 0) {
-                        $stmt_insert->bind_param('is', $id_brano, $data);
+                        $stmt_insert->bind_param('isi', $id_brano, $data, $ordine);
                         $stmt_insert->execute();
                         $inseriti++;
+                        $ordine++;
                     }
                 }
                 $message = $inseriti . ' brani registrati per la scaletta';

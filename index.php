@@ -33,7 +33,7 @@ if (isset($_GET['delete_date'])) {
 
 // Build base query
 $base_query = "
-    SELECT b.titolo, b.tipologia, bs.BranoSuonatoIl
+    SELECT b.titolo, b.tipologia, bs.BranoSuonatoIl, bs.OrdineEsecuzione
     FROM BraniSuonati bs
     JOIN Brani b ON bs.IdBrano = b.Id
     WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)
@@ -113,7 +113,7 @@ $dates = array_column($result_dates->fetch_all(MYSQLI_ASSOC), 'date_played');
 // Main query for all records in these dates
 if (!empty($dates)) {
     $placeholders = str_repeat('?,', count($dates) - 1) . '?';
-    $main_query = $base_query . " AND bs.BranoSuonatoIl IN ($placeholders) ORDER BY bs.BranoSuonatoIl DESC";
+    $main_query = $base_query . " AND bs.BranoSuonatoIl IN ($placeholders) ORDER BY bs.BranoSuonatoIl DESC, bs.OrdineEsecuzione ASC";
     $main_params = array_merge($params, $dates);
     $main_types = $types . str_repeat('s', count($dates));
 
