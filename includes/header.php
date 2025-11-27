@@ -9,7 +9,7 @@
 </head>
 <body class="bg-gray-50 text-gray-900">
     <?php session_start(); ?>
-    <header class="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
+    <header class="bg-gradient-to-r from-orange-600 to-orange-800 text-white shadow-lg">
         <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="index.php" class="text-xl font-bold flex items-center space-x-2">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
             </button>
         </nav>
         <div class="md:hidden hidden" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 bg-blue-700">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-orange-700">
                 <?php if (is_logged_in()): ?>
                     <a href="manage_brani.php" class="flex items-center space-x-1 text-white hover:bg-blue-800 px-3 py-2 rounded">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
