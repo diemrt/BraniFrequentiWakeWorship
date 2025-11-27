@@ -10,6 +10,7 @@ if (!is_logged_in()) {
 }
 
 $message = '';
+$title_search = $_GET['title'] ?? '';
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit = 10;
 $offset = ($page - 1) * $limit;
@@ -61,15 +62,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$result = $conn->query("SELECT COUNT(*) FROM Brani");
-$total = $result->fetch_row()[0];
+$count_query = "SELECT COUNT(*) FROM Brani";
+$params = [];
+$types = '';
+
+if (!empty($title_search)) {
+    $count_query .= " WHERE Titolo LIKE ?";
+    $params[] = '%' . $title_search . '%';
+    $types .= 's';
+}
+
+$stmt_count = $conn->prepare($count_query);
+if (!empty($params)) {
+    $stmt_count->bind_param($types, ...$params);
+}
+$stmt_count->execute();
+$result_count = $stmt_count->get_result();
+$total = $result_count->fetch_row()[0];
 $total_pages = ceil($total / $limit);
 
-$stmt = $conn->prepare("SELECT * FROM Brani ORDER BY Titolo LIMIT ? OFFSET ?");
-$stmt->bind_param('ii', $limit, $offset);
+$select_query = "SELECT * FROM Brani";
+if (!empty($title_search)) {
+    $select_query .= " WHERE Titolo LIKE ?";
+}
+$select_query .= " ORDER BY Titolo LIMIT ? OFFSET ?";
+$select_params = array_merge($params, [$limit, $offset]);
+$select_types = $types . 'ii';
+
+$stmt = $conn->prepare($select_query);
+$stmt->bind_param($select_types, ...$select_params);
 $stmt->execute();
 $result = $stmt->get_result();
 $brani = $result->fetch_all(MYSQLI_ASSOC);
+
+$query_string = http_build_query(['title' => $title_search]);
 ?>
 
 <?php include 'includes/header.php'; ?>
@@ -96,6 +122,17 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
         </div>
     <?php endif; ?>
 
+    <form method="GET" class="mb-8 bg-gray-100 p-4 rounded-lg">
+        <div>
+            <label for="title" class="block text-sm font-medium text-gray-700">Cerca per titolo</label>
+            <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Cerca</button>
+            <a href="manage_brani.php" class="ml-4 text-gray-600 hover:text-gray-800">Reset</a>
+        </div>
+    </form>
+
     <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
             <?php foreach ($brani as $brano): ?>
@@ -109,7 +146,7 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
                             </svg>
                             Modifica
                         </button>
-                        <a href="?delete=<?php echo $brano['Id']; ?>" onclick="return confirm('Sicuro di voler eliminare questo brano?')" class="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <a href="?<?php echo $query_string; ?>&delete=<?php echo $brano['Id']; ?>" onclick="return confirm('Sicuro di voler eliminare questo brano?')" class="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -123,7 +160,7 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="flex justify-center space-x-2 mb-8">
         <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $page - 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
@@ -131,10 +168,10 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
             </a>
         <?php endif; ?>
         <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-            <a href="?page=<?php echo $i; ?>" class="px-4 py-2 text-sm font-medium rounded-md <?php echo $i == $page ? 'text-orange-600 bg-orange-50 border border-orange-500' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'; ?>"><?php echo $i; ?></a>
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $i; ?>" class="px-4 py-2 text-sm font-medium rounded-md <?php echo $i == $page ? 'text-orange-600 bg-orange-50 border border-orange-500' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'; ?>"><?php echo $i; ?></a>
         <?php endfor; ?>
         <?php if ($page < $total_pages): ?>
-            <a href="?page=<?php echo $page + 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $page + 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 Successivo
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
