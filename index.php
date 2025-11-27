@@ -7,12 +7,14 @@ require_once 'includes/functions.php';
 $title_search = $_GET['title'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
 $date_to = $_GET['date_to'] ?? '';
+$day_filter = $_GET['day'] ?? 'entrambi';
 
 // Build query string for pagination
 $query_string = http_build_query([
     'title' => $title_search,
     'date_from' => $date_from,
-    'date_to' => $date_to
+    'date_to' => $date_to,
+    'day' => $day_filter
 ]);
 
 // Build base query
@@ -48,7 +50,13 @@ if (!empty($date_to)) {
     $types .= 's';
 }
 
-// Execute count
+if ($day_filter == 'venerdi') {
+    $base_query = str_replace("IN (6, 1)", "= 6", $base_query);
+    $count_query = str_replace("IN (6, 1)", "= 6", $count_query);
+} elseif ($day_filter == 'dom') {
+    $base_query = str_replace("IN (6, 1)", "= 1", $base_query);
+    $count_query = str_replace("IN (6, 1)", "= 1", $count_query);
+}
 $stmt_count = $conn->prepare($count_query);
 if (!empty($params)) {
     $stmt_count->bind_param($types, ...$params);
@@ -89,6 +97,23 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
             <div>
                 <label for="date_to" class="block text-sm font-medium text-gray-700">Data a</label>
                 <input type="date" id="date_to" name="date_to" value="<?php echo sanitize($date_to); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+            </div>
+        </div>
+        <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per giorno</label>
+            <div class="flex space-x-2">
+                <label class="flex-1">
+                    <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> onchange="this.form.submit()" class="sr-only">
+                    <span class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 cursor-pointer <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700' : ''; ?>">Venerdì</span>
+                </label>
+                <label class="flex-1">
+                    <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> onchange="this.form.submit()" class="sr-only">
+                    <span class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 cursor-pointer <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700' : ''; ?>">Domenica</span>
+                </label>
+                <label class="flex-1">
+                    <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> onchange="this.form.submit()" class="sr-only">
+                    <span class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 cursor-pointer <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700' : ''; ?>">Entrambi</span>
+                </label>
             </div>
         </div>
         <div class="mt-4">
