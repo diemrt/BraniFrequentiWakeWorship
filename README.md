@@ -32,7 +32,7 @@ Web application per la gestione e tracciamento dei brani suonati durante le sess
 ## Funzionalità Implementate
 
 ### Landing Page (`index.php`)
-Visualizza l'elenco degli ultimi 10 brani suonati negli ultimi venerdì e domeniche. Recupera i dati dalla tabella `BraniSuonati` filtrando per le date più recenti valide, ordinati per data discendente.
+Visualizza l'elenco dei brani suonati negli ultimi venerdì e domeniche, con possibilità di ricerca per titolo e filtro per intervallo di date. I risultati sono paginati (10 per pagina) e ordinati per data discendente. Ogni brano mostra la data e il giorno della settimana (Venerdì o Domenica).
 
 ### Gestione Brani (`manage_brani.php`)
 Interfaccia per amministrare la tabella `Brani`:
