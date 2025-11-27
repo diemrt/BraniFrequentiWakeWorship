@@ -16,6 +16,6 @@ function copyScaletta(date, day_it, titoli) {
         alert('Scaletta copiata negli appunti!');
     }).catch(err => {
         console.error('Errore nella copia:', err);
-        alert('Errore nella copia della scaletta.');
+        alert('Errore nella copia della scaletta: ' + err.message);
     });
 }

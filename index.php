@@ -190,7 +190,7 @@ foreach ($brani as $brano) {
                 </h2>
                 <?php if ($date > $today): ?>
                     <span class="bg-green-700 text-white text-xs px-2 py-1 rounded ml-2">Programmata</span>
-                    <button onclick="copyScaletta('<?php echo $date; ?>', '<?php echo $day_it; ?>', <?php echo json_encode(array_column($brani_per_data, 'titolo')); ?>)" class="ml-4 text-blue-600 hover:text-blue-800" title="Copia scaletta">
+                    <button onclick="copyScaletta(<?php echo htmlspecialchars(json_encode($date)); ?>, <?php echo htmlspecialchars(json_encode($day_it)); ?>, <?php echo htmlspecialchars(json_encode(array_column($brani_per_data, 'titolo'))); ?>)" class="ml-4 text-blue-600 hover:text-blue-800" title="Copia scaletta">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
