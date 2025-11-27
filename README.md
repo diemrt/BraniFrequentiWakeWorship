@@ -53,6 +53,9 @@ Interfaccia per amministrare la tabella `Utenti`:
 ### Registrazione Frequenza (`register_frequency.php`)
 Permette di registrare l'esecuzione di un brano selezionato dalla lista, associandolo a una data valida (solo venerdì o domeniche). Inserisce record nella tabella `BraniSuonati`.
 
+### Crea Scaletta (`create_playlist.php`)
+Interfaccia per creare una scaletta di brani per una data futura (solo venerdì o domeniche). Permette di selezionare molteplici brani dalla lista esistente. Per ciascun brano suonato nell'ultimo mese, viene mostrato un warning con la data dell'ultima esecuzione. Salvando la scaletta, tutti i brani selezionati vengono registrati come suonati nella data scelta, inserendo record nella tabella `BraniSuonati`.
+
 ### Autenticazione (`login.php`, `logout.php`)
 Sistema di login che verifica le credenziali contro il database degli utenti. Utilizza sessioni PHP per mantenere lo stato di login.
 
