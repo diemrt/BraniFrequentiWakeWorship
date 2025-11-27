@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $stmt->get_result();
             $count = $result->fetch_row()[0];
             if ($count > 0) {
-                $stmt = $conn->prepare("INSERT INTO BraniSuonati (id_brano, data) VALUES (?, ?)");
+                $stmt = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl) VALUES (?, ?)");
                 $stmt->bind_param('is', $id_brano, $data);
                 $stmt->execute();
                 $message = 'Frequenza registrata';
