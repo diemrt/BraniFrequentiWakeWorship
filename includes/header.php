@@ -31,12 +31,6 @@
                         </svg>
                         <span>Gestisci Utenti</span>
                     </a>
-                    <a href="register_frequency.php" class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        <span>Registra Frequenza</span>
-                    </a>
                     <a href="create_playlist.php" class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
@@ -72,12 +66,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                         <span>Gestisci Brani</span>
-                    </a>
-                    <a href="register_frequency.php" class="flex items-center space-x-1 text-white hover:bg-orange-800 px-3 py-2 rounded">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        <span>Registra Frequenza</span>
                     </a>
                     <a href="create_playlist.php" class="flex items-center space-x-1 text-white hover:bg-orange-800 px-3 py-2 rounded">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
