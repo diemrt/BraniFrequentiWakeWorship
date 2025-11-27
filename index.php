@@ -17,6 +17,20 @@ $query_string = http_build_query([
     'day' => $day_filter
 ]);
 
+$today = date('Y-m-d');
+
+// Handle delete scaletta
+if (isset($_GET['delete_date'])) {
+    $delete_date = $_GET['delete_date'];
+    if ($delete_date > $today) {
+        $stmt = $conn->prepare("DELETE FROM BraniSuonati WHERE BranoSuonatoIl = ?");
+        $stmt->bind_param('s', $delete_date);
+        $stmt->execute();
+        header('Location: index.php?' . $query_string . '&page=' . ($_GET['page'] ?? 1));
+        exit;
+    }
+}
+
 // Build base query
 $base_query = "
     SELECT b.titolo, b.tipologia, bs.BranoSuonatoIl
@@ -165,12 +179,24 @@ foreach ($brani as $brano) {
     </form>
     <?php foreach ($grouped as $date => $brani_per_data): ?>
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4"><?php
-                $timestamp = strtotime($date);
-                $day = date('l', $timestamp);
-                $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
-                echo sanitize($date . ' (' . $day_it . ')');
-            ?></h2>
+            <div class="flex items-center mb-4">
+                <h2 class="text-2xl font-bold <?php echo ($date > $today) ? 'text-green-500' : 'text-gray-800'; ?>">
+                    <?php
+                        $timestamp = strtotime($date);
+                        $day = date('l', $timestamp);
+                        $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
+                        echo sanitize($date . ' (' . $day_it . ')');
+                    ?>
+                </h2>
+                <?php if ($date > $today): ?>
+                    <span class="bg-green-500 text-white text-xs px-2 py-1 rounded ml-2">Programmata</span>
+                    <button onclick="deleteScaletta('<?php echo $date; ?>')" class="ml-4 text-red-600 hover:text-red-800" title="Elimina scaletta">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                <?php endif; ?>
+            </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php foreach ($brani_per_data as $brano): ?>
                     <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
