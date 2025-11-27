@@ -73,56 +73,120 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <?php include 'includes/header.php'; ?>
-<h1 class="text-3xl mb-4">Gestione Brani</h1>
-<?php if ($message): ?>
-    <p class="text-green-500"><?php echo $message; ?></p>
-<?php endif; ?>
-
-<table class="w-full bg-white shadow rounded">
-    <thead>
-        <tr class="bg-gray-200">
-            <th class="p-2 text-left">Titolo</th>
-            <th class="p-2 text-left">Tipologia</th>
-            <th class="p-2 text-left">Azioni</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php foreach ($brani as $brano): ?>
-            <tr>
-                <td class="p-2"><?php echo sanitize($brano['Titolo']); ?></td>
-                <td class="p-2"><?php echo sanitize($brano['Tipologia']); ?></td>
-                <td class="p-2">
-                    <button onclick="editBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>', '<?php echo $brano['Tipologia']; ?>')">Modifica</button>
-                    <a href="?delete=<?php echo $brano['Id']; ?>" onclick="return confirm('Sicuro?')">Elimina</a>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
-
-<div class="mt-4 flex justify-center space-x-2">
-    <?php if ($page > 1): ?>
-        <a href="?page=<?php echo $page - 1; ?>" class="bg-blue-600 text-white px-4 py-2 rounded">Precedente</a>
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Gestione Brani</h1>
+    <?php if ($message): ?>
+        <div class="mb-4 p-4 rounded-md <?php echo strpos($message, 'eliminato') !== false || strpos($message, 'aggiunto') !== false || strpos($message, 'aggiornato') !== false ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'; ?>">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <?php if (strpos($message, 'eliminato') !== false || strpos($message, 'aggiunto') !== false || strpos($message, 'aggiornato') !== false): ?>
+                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    <?php else: ?>
+                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    <?php endif; ?>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium"><?php echo $message; ?></p>
+                </div>
+            </div>
+        </div>
     <?php endif; ?>
-    <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-        <a href="?page=<?php echo $i; ?>" class="px-4 py-2 rounded <?php echo $i == $page ? 'bg-gray-300' : 'bg-white border'; ?>"><?php echo $i; ?></a>
-    <?php endfor; ?>
-    <?php if ($page < $total_pages): ?>
-        <a href="?page=<?php echo $page + 1; ?>" class="bg-blue-600 text-white px-4 py-2 rounded">Successivo</a>
-    <?php endif; ?>
+
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titolo</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipologia</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Azioni</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <?php foreach ($brani as $brano): ?>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?php echo sanitize($brano['Titolo']); ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo sanitize($brano['Tipologia']); ?></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="editBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>', '<?php echo $brano['Tipologia']; ?>')" class="text-indigo-600 hover:text-indigo-900 mr-4 inline-flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                Modifica
+                            </button>
+                            <a href="?delete=<?php echo $brano['Id']; ?>" onclick="return confirm('Sicuro di voler eliminare questo brano?')" class="text-red-600 hover:text-red-900 inline-flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                Elimina
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex justify-center space-x-2 mb-8">
+        <?php if ($page > 1): ?>
+            <a href="?page=<?php echo $page - 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Precedente
+            </a>
+        <?php endif; ?>
+        <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+            <a href="?page=<?php echo $i; ?>" class="px-4 py-2 text-sm font-medium rounded-md <?php echo $i == $page ? 'text-blue-600 bg-blue-50 border border-blue-500' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'; ?>"><?php echo $i; ?></a>
+        <?php endfor; ?>
+        <?php if ($page < $total_pages): ?>
+            <a href="?page=<?php echo $page + 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                Successivo
+                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        <?php endif; ?>
+    </div>
+
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800">Aggiungi/Modifica Brano</h2>
+        <form method="post" id="branoForm">
+            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <input type="hidden" name="id" id="branoId">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="titolo" class="block text-sm font-medium text-gray-700 mb-1">Titolo</label>
+                    <input type="text" name="titolo" id="titolo" placeholder="Titolo del brano" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                </div>
+                <div>
+                    <label for="tipologia" class="block text-sm font-medium text-gray-700 mb-1">Tipologia</label>
+                    <select name="tipologia" id="tipologia" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="Lode">Lode</option>
+                        <option value="Adorazione">Adorazione</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex space-x-4">
+                <button type="submit" name="add" id="addBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Aggiungi
+                </button>
+                <button type="submit" name="edit" id="editBtn" class="hidden inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Salva Modifiche
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
-
-<form method="post" id="branoForm" class="mt-4 bg-white p-4 rounded shadow">
-    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-    <input type="hidden" name="id" id="branoId">
-    <input type="text" name="titolo" id="titolo" placeholder="Titolo" class="w-full p-2 mb-2 border" required>
-    <select name="tipologia" id="tipologia" class="w-full p-2 mb-2 border" required>
-        <option value="Lode">Lode</option>
-        <option value="Adorazione">Adorazione</option>
-    </select>
-    <button type="submit" name="add" id="addBtn" class="bg-blue-600 text-white p-2">Aggiungi</button>
-    <button type="submit" name="edit" id="editBtn" class="bg-green-600 text-white p-2 hidden">Salva Modifiche</button>
-</form>
 
 <script>
 function editBrano(id, titolo, tipologia) {
@@ -131,6 +195,7 @@ function editBrano(id, titolo, tipologia) {
     document.getElementById('tipologia').value = tipologia;
     document.getElementById('addBtn').classList.add('hidden');
     document.getElementById('editBtn').classList.remove('hidden');
+    document.getElementById('titolo').focus();
 }
 </script>
 <?php include 'includes/footer.php'; ?>
