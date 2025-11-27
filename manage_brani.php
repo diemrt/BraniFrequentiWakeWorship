@@ -81,9 +81,9 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
 <table class="w-full bg-white shadow rounded">
     <thead>
         <tr class="bg-gray-200">
-            <th class="p-2">Titolo</th>
-            <th class="p-2">Tipologia</th>
-            <th class="p-2">Azioni</th>
+            <th class="p-2 text-left">Titolo</th>
+            <th class="p-2 text-left">Tipologia</th>
+            <th class="p-2 text-left">Azioni</th>
         </tr>
     </thead>
     <tbody>
