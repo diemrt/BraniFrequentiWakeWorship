@@ -27,7 +27,7 @@ Web application per la gestione e tracciamento dei brani suonati durante le sess
 ### Tabella `Utenti`
 - `Id` (INT, PRIMARY KEY, AUTO_INCREMENT): Identificatore univoco dell'utente.
 - `Username` (VARCHAR(255), UNIQUE): Nome utente.
-- `Password` (VARCHAR(255)): Password hashata (non implementata attualmente, autenticazione hardcoded).
+- `Password` (VARCHAR(255)): Password hashata (implementata con password_hash).
 
 ## Funzionalità Implementate
 
@@ -42,11 +42,19 @@ Interfaccia per amministrare la tabella `Brani`:
 - Paginazione per gestire grandi quantità di dati (10 brani per pagina).
 - Ordinamento alfabetico per titolo.
 
+### Gestione Utenti (`manage_users.php`)
+Interfaccia per amministrare la tabella `Utenti`:
+- Aggiungere nuovi utenti con username, password e conferma password.
+- Modificare username e password esistenti.
+- Eliminare utenti.
+- Paginazione per gestire grandi quantità di dati (10 utenti per pagina).
+- Ordinamento alfabetico per username.
+
 ### Registrazione Frequenza (`register_frequency.php`)
 Permette di registrare l'esecuzione di un brano selezionato dalla lista, associandolo a una data valida (solo venerdì o domeniche). Inserisce record nella tabella `BraniSuonati`.
 
 ### Autenticazione (`login.php`, `logout.php`)
-Sistema di login semplice con credenziali hardcoded (username: admin, password: admin) per proteggere le pagine di gestione e registrazione. Utilizza sessioni PHP per mantenere lo stato di login.
+Sistema di login che verifica le credenziali contro il database degli utenti. Utilizza sessioni PHP per mantenere lo stato di login.
 
 ### Sicurezza e Validazione
 - Autenticazione richiesta per accesso alle pagine di gestione e registrazione.

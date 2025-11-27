@@ -1,12 +1,20 @@
 <?php
 // session_start(); // Ora in header.php
+require_once 'db.php';
 
 function login($username, $password) {
-    // Hardcoded per semplicità
-    if ($username === 'admin' && $password === 'admin') {
-        $_SESSION['logged_in'] = true;
-        session_regenerate_id(true);
-        return true;
+    global $conn;
+    $stmt = $conn->prepare("SELECT Password FROM Utenti WHERE Username = ?");
+    $stmt->bind_param('s', $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        if (password_verify($password, $row['Password'])) {
+            $_SESSION['logged_in'] = true;
+            $_SESSION['username'] = $username;
+            session_regenerate_id(true);
+            return true;
+        }
     }
     return false;
 }
