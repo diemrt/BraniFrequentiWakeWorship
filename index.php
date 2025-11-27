@@ -24,7 +24,12 @@ $base_query = "
     JOIN Brani b ON bs.IdBrano = b.Id
     WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)
 ";
-$count_query = $base_query;
+$count_query = "
+    SELECT COUNT(*)
+    FROM BraniSuonati bs
+    JOIN Brani b ON bs.IdBrano = b.Id
+    WHERE DAYOFWEEK(bs.BranoSuonatoIl) IN (6, 1)
+";
 $params = [];
 $types = '';
 
@@ -151,7 +156,7 @@ $brani = $result->fetch_all(MYSQLI_ASSOC);
     <?php endif; ?>
 
     <?php if ($total_pages > 1): ?>
-    <div class="flex justify-center space-x-2 mb-8">
+    <div class="flex justify-center space-x-2 mt-4 mb-8">
         <?php if ($page > 1): ?>
             <a href="?<?php echo $query_string; ?>&page=<?php echo $page - 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
