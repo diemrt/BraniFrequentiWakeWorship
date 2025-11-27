@@ -8,6 +8,9 @@ Web application per la gestione e tracciamento dei brani suonati durante le sess
 - **Database**: MySQL
 - **Hosting**: InfinityFree (hosting gratuito con supporto PHP e MySQL)
 
+## Approccio di Sviluppo
+- **Database-First**: Il database viene progettato e creato prima dello sviluppo del codice applicativo. Gli script SQL per la creazione delle tabelle sono disponibili nella cartella `DBScripts`.
+
 ## Struttura del Database
 
 ### Tabella `Brani`
