@@ -1,6 +1,7 @@
 <?php
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
+require_once 'includes/functions.php';
 
 // Query per ultimi brani suonati negli ultimi venerdì e domenica
 $stmt = $conn->prepare("
