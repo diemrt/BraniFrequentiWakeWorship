@@ -9,13 +9,30 @@ if (!is_logged_in()) {
     exit;
 }
 
-$message = '';
+$message = $_SESSION['message'] ?? '';
+$message_type = $_SESSION['message_type'] ?? 'info';
+if ($message) {
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
 $title_search = $_GET['title'] ?? '';
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $limit = 10;
 $offset = ($page - 1) * $limit;
 
-if (isset($_GET['delete'])) {
+// Handle delete confirmation request
+if (isset($_GET['confirm_delete'])) {
+    $id = (int)$_GET['confirm_delete'];
+    $stmt = $conn->prepare("SELECT Titolo FROM Brani WHERE Id = ?");
+    $stmt->bind_param('i', $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $confirm_brano = $result->fetch_assoc();
+}
+
+// Handle delete
+if (isset($_GET['delete']) && isset($_GET['confirmed'])) {
     $id = (int)$_GET['delete'];
     // Check if associated
     $stmt = $conn->prepare("SELECT COUNT(*) FROM BraniSuonati WHERE IdBrano = ?");
@@ -27,15 +44,20 @@ if (isset($_GET['delete'])) {
         $stmt = $conn->prepare("DELETE FROM Brani WHERE Id = ?");
         $stmt->bind_param('i', $id);
         $stmt->execute();
-        $message = 'Brano eliminato';
+        $_SESSION['message'] = 'Brano eliminato con successo';
+        $_SESSION['message_type'] = 'success';
     } else {
-        $message = 'Impossibile eliminare, associato a registrazioni';
+        $_SESSION['message'] = 'Impossibile eliminare, associato a registrazioni';
+        $_SESSION['message_type'] = 'error';
     }
+    header('Location: manage_brani.php?title=' . urlencode($title_search) . '&page=' . $page);
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $message = 'Token CSRF invalido';
+        $_SESSION['message'] = 'Token CSRF invalido';
+        $_SESSION['message_type'] = 'error';
     } elseif (isset($_POST['add'])) {
         $titolo = sanitize($_POST['titolo']);
         $tipologia = sanitize($_POST['tipologia']);
@@ -43,9 +65,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare("INSERT INTO Brani (titolo, tipologia) VALUES (?, ?)");
             $stmt->bind_param('ss', $titolo, $tipologia);
             $stmt->execute();
-            $message = 'Brano aggiunto';
+            $_SESSION['message'] = 'Brano aggiunto con successo';
+            $_SESSION['message_type'] = 'success';
         } else {
-            $message = 'Dati invalidi';
+            $_SESSION['message'] = 'Dati invalidi';
+            $_SESSION['message_type'] = 'error';
         }
     } elseif (isset($_POST['edit'])) {
         $id = (int)$_POST['id'];
@@ -55,11 +79,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare("UPDATE Brani SET titolo = ?, tipologia = ? WHERE id = ?");
             $stmt->bind_param('ssi', $titolo, $tipologia, $id);
             $stmt->execute();
-            $message = 'Brano aggiornato';
+            $_SESSION['message'] = 'Brano aggiornato con successo';
+            $_SESSION['message_type'] = 'success';
         } else {
-            $message = 'Dati invalidi';
+            $_SESSION['message'] = 'Dati invalidi';
+            $_SESSION['message_type'] = 'error';
         }
     }
+    header('Location: manage_brani.php?title=' . urlencode($title_search) . '&page=' . $page);
+    exit;
 }
 
 $count_query = "SELECT COUNT(*) FROM Brani";
@@ -96,6 +124,17 @@ $result = $stmt->get_result();
 $brani = $result->fetch_all(MYSQLI_ASSOC);
 
 $query_string = http_build_query(['title' => $title_search]);
+
+// Get brano for editing if edit_id is set
+$edit_brano = null;
+if (isset($_GET['edit_id'])) {
+    $edit_id = (int)$_GET['edit_id'];
+    $stmt = $conn->prepare("SELECT * FROM Brani WHERE Id = ?");
+    $stmt->bind_param('i', $edit_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $edit_brano = $result->fetch_assoc();
+}
 ?>
 
 <?php include 'includes/header.php'; ?>
@@ -103,11 +142,30 @@ $query_string = http_build_query(['title' => $title_search]);
     <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Gestione Brani</h1>
     
     <?php if ($message): ?>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                new Toast('<?php echo htmlspecialchars($message, ENT_QUOTES); ?>', '<?php echo strpos($message, 'eliminato') !== false || strpos($message, 'aggiunto') !== false || strpos($message, 'aggiornato') !== false ? 'success' : 'error'; ?>');
-            });
-        </script>
+        <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
+            <p class="<?php echo $message_type === 'success' ? 'text-green-800' : 'text-red-800'; ?> text-sm md:text-base"><?php echo sanitize($message); ?></p>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_GET['confirm_delete']) && $confirm_brano): ?>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center md:justify-center" id="delete-modal">
+            <div class="bg-white w-full md:w-96 rounded-t-2xl md:rounded-2xl p-6 md:p-8 space-y-6 max-h-96 overflow-y-auto">
+                <h2 class="text-xl md:text-2xl font-bold text-center text-gray-900">Eliminare il brano?</h2>
+                <p class="text-gray-700 text-sm md:text-base">
+                    Sei sicuro di voler eliminare "<?php echo sanitize($confirm_brano['Titolo']); ?>"?
+                </p>
+                <div class="flex gap-4">
+                    <a href="manage_brani.php?title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>" 
+                       class="flex-1 px-4 py-3 md:py-4 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium text-gray-900 text-center transition-colors">
+                        Annulla
+                    </a>
+                    <a href="manage_brani.php?delete=<?php echo $confirm_brano['Id'] ?? $_GET['confirm_delete']; ?>&confirmed=1&title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>" 
+                       class="flex-1 px-4 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg md:rounded-xl font-medium text-center transition-colors">
+                        Elimina
+                    </a>
+                </div>
+            </div>
+        </div>
     <?php endif; ?>
 
     <!-- Search Form -->
@@ -153,20 +211,20 @@ $query_string = http_build_query(['title' => $title_search]);
                     
                     <!-- Action Buttons - Always Visible -->
                     <div class="flex gap-2 mt-3">
-                        <button onclick="editBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>', '<?php echo addslashes($brano['Tipologia']); ?>')" 
-                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm min-h-[44px] select-none">
+                        <a href="?edit_id=<?php echo $brano['Id']; ?>&title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>" 
+                           class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm min-h-[44px] select-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span>Modifica</span>
-                        </button>
-                        <button onclick="deleteBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>')" 
-                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm min-h-[44px] select-none">
+                        </a>
+                        <a href="?confirm_delete=<?php echo $brano['Id']; ?>&title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>" 
+                           class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm min-h-[44px] select-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
                             <span>Elimina</span>
-                        </button>
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -201,16 +259,19 @@ $query_string = http_build_query(['title' => $title_search]);
     <?php endif; ?>
 
     <!-- Add/Edit Form -->
-    <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-6">
-        <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-800">Aggiungi/Modifica Brano</h2>
-        <form method="post" id="branoForm">
+    <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-6" id="branoForm">
+        <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-800"><?php echo $edit_brano ? 'Modifica' : 'Aggiungi'; ?> Brano</h2>
+        <form method="post">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-            <input type="hidden" name="id" id="branoId">
+            <?php if ($edit_brano): ?>
+                <input type="hidden" name="id" value="<?php echo $edit_brano['Id']; ?>">
+            <?php endif; ?>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
                     <label for="titolo" class="block text-sm font-medium text-gray-700 mb-2">Titolo</label>
                     <input type="text" name="titolo" id="titolo" placeholder="Titolo del brano" 
+                           value="<?php echo $edit_brano ? sanitize($edit_brano['Titolo']) : ''; ?>"
                            class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]" 
                            required>
                 </div>
@@ -219,53 +280,37 @@ $query_string = http_build_query(['title' => $title_search]);
                     <select name="tipologia" id="tipologia" 
                             class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]" 
                             required>
-                        <option value="Lode">Lode</option>
-                        <option value="Adorazione">Adorazione</option>
+                        <option value="Lode" <?php echo ($edit_brano && $edit_brano['Tipologia'] == 'Lode') ? 'selected' : ''; ?>>Lode</option>
+                        <option value="Adorazione" <?php echo ($edit_brano && $edit_brano['Tipologia'] == 'Adorazione') ? 'selected' : ''; ?>>Adorazione</option>
                     </select>
                 </div>
             </div>
 
             <div class="flex flex-col md:flex-row gap-3">
-                <button type="submit" name="add" id="addBtn" 
-                        class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    <span>Aggiungi</span>
-                </button>
-                <button type="submit" name="edit" id="editBtn" 
-                        class="hidden flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Salva Modifiche</span>
-                </button>
+                <?php if ($edit_brano): ?>
+                    <button type="submit" name="edit" 
+                            class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Salva Modifiche</span>
+                    </button>
+                    <a href="manage_brani.php?title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>"
+                       class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none text-center">
+                        Annulla
+                    </a>
+                <?php else: ?>
+                    <button type="submit" name="add" 
+                            class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        <span>Aggiungi</span>
+                    </button>
+                <?php endif; ?>
             </div>
         </form>
     </div>
 </div>
-
-<script>
-function editBrano(id, titolo, tipologia) {
-    document.getElementById('branoId').value = id;
-    document.getElementById('titolo').value = titolo;
-    document.getElementById('tipologia').value = tipologia;
-    document.getElementById('addBtn').classList.add('hidden');
-    document.getElementById('editBtn').classList.remove('hidden');
-    document.getElementById('titolo').focus();
-    // Scroll to form
-    document.getElementById('branoForm').scrollIntoView({ behavior: 'smooth' });
-}
-
-function deleteBrano(id, title) {
-    showDeleteModal('Eliminare il brano?', 
-        `Sei sicuro di voler eliminare "${title}"?`,
-        () => {
-            const params = new URLSearchParams(window.location.search);
-            params.set('delete', id);
-            window.location.href = 'manage_brani.php?' + params.toString();
-        });
-}
-</script>
 
 <?php include 'includes/footer.php'; ?>

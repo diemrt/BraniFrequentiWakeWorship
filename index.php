@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
@@ -19,16 +20,51 @@ $query_string = http_build_query([
 
 $today = date('Y-m-d');
 
+$message = $_SESSION['message'] ?? '';
+$message_type = $_SESSION['message_type'] ?? 'info';
+if ($message) {
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
+// Handle delete confirmation request
+if (isset($_GET['confirm_delete'])) {
+    $delete_date = $_GET['confirm_delete'];
+    $day = date('l', strtotime($delete_date));
+    $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
+}
+
 // Handle delete scaletta
-if (isset($_GET['delete_date'])) {
+if (isset($_GET['delete_date']) && isset($_GET['confirmed'])) {
     $delete_date = $_GET['delete_date'];
     if ($delete_date > $today) {
         $stmt = $conn->prepare("DELETE FROM BraniSuonati WHERE BranoSuonatoIl = ?");
         $stmt->bind_param('s', $delete_date);
         $stmt->execute();
+        $_SESSION['message'] = 'Scaletta eliminata con successo';
+        $_SESSION['message_type'] = 'success';
         header('Location: index.php?' . $query_string . '&page=' . ($_GET['page'] ?? 1));
         exit;
     }
+}
+
+// Handle copy/share request
+$copy_date = $_GET['copy_date'] ?? '';
+if ($copy_date) {
+    // We'll show a modal with the text to copy
+    $stmt = $conn->prepare("
+        SELECT b.titolo
+        FROM BraniSuonati bs
+        JOIN Brani b ON bs.IdBrano = b.Id
+        WHERE bs.BranoSuonatoIl = ?
+        ORDER BY bs.OrdineEsecuzione ASC
+    ");
+    $stmt->bind_param('s', $copy_date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $copy_brani = $result->fetch_all(MYSQLI_ASSOC);
+    $day = date('l', strtotime($copy_date));
+    $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
 }
 
 // Build base query
@@ -141,6 +177,65 @@ foreach ($brani as $brano) {
 <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Ultimi Brani Suonati</h1>
     
+    <?php if ($message): ?>
+        <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
+            <p class="<?php echo $message_type === 'success' ? 'text-green-800' : 'text-red-800'; ?> text-sm md:text-base"><?php echo sanitize($message); ?></p>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_GET['confirm_delete'])): ?>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center md:justify-center" id="delete-modal">
+            <div class="bg-white w-full md:w-96 rounded-t-2xl md:rounded-2xl p-6 md:p-8 space-y-6 max-h-96 overflow-y-auto">
+                <h2 class="text-xl md:text-2xl font-bold text-center text-gray-900">Eliminare la scaletta?</h2>
+                <p class="text-gray-700 text-sm md:text-base">
+                    Sei sicuro di voler eliminare la scaletta per il <?php echo sanitize($delete_date . ' (' . $day_it . ')'); ?>? Questa azione non può essere annullata.
+                </p>
+                <div class="flex gap-4">
+                    <a href="index.php?<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                       class="flex-1 px-4 py-3 md:py-4 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium text-gray-900 text-center transition-colors">
+                        Annulla
+                    </a>
+                    <a href="index.php?delete_date=<?php echo urlencode($delete_date); ?>&confirmed=1&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                       class="flex-1 px-4 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg md:rounded-xl font-medium text-center transition-colors">
+                        Elimina
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+    
+    <?php if ($copy_date && !empty($copy_brani)): ?>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center md:justify-center" id="copy-modal">
+            <div class="bg-white w-full md:w-auto md:min-w-[500px] rounded-t-2xl md:rounded-2xl p-6 md:p-8 space-y-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-start">
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-900">Copia Scaletta</h2>
+                    <a href="index.php?<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </a>
+                </div>
+                <p class="text-sm text-gray-600">Copia il testo sottostante e condividilo:</p>
+                <textarea readonly class="w-full h-48 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm" id="copy-text"><?php
+                    echo "Ciao a tutti! Ecco la scaletta in programma per {$copy_date} ({$day_it}):\n";
+                    foreach ($copy_brani as $brano) {
+                        echo "- " . $brano['titolo'] . "\n";
+                    }
+                ?></textarea>
+                <div class="flex gap-3">
+                    <button onclick="document.getElementById('copy-text').select();document.execCommand('copy');this.textContent='Copiato!';setTimeout(()=>this.textContent='Copia negli appunti',2000)" 
+                            class="flex-1 px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors">
+                        Copia negli appunti
+                    </button>
+                    <a href="index.php?<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                       class="flex-1 px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium text-center transition-colors">
+                        Chiudi
+                    </a>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+    
     <!-- Search Form - Always Visible -->
     <div class="mb-6 md:mb-8">
         <div class="md:p-0">
@@ -221,23 +316,23 @@ foreach ($brani as $brano) {
                 <!-- Action Buttons -->
                 <div class="flex gap-2 mb-4 flex-wrap">
                     <?php if ($date >= $today): ?>
-                        <button onclick="copyScaletta(<?php echo htmlspecialchars(json_encode($date)); ?>, <?php echo htmlspecialchars(json_encode($day_it)); ?>, <?php echo htmlspecialchars(json_encode(array_column($brani_per_data, 'titolo'))); ?>)" 
-                                class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
-                                title="Condividi o copia scaletta">
+                        <a href="index.php?copy_date=<?php echo urlencode($date); ?>&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                           class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
+                           title="Condividi o copia scaletta">
                             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                             </svg>
                             <span class="hidden md:inline">Copia</span>
-                        </button>
+                        </a>
                         <?php if (is_logged_in()): ?>
-                            <button onclick="deleteScaletta('<?php echo $date; ?>')" 
-                                    class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
-                                    title="Elimina scaletta">
+                            <a href="index.php?confirm_delete=<?php echo urlencode($date); ?>&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                               class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
+                               title="Elimina scaletta">
                                 <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
                                 <span class="hidden md:inline">Elimina</span>
-                            </button>
+                            </a>
                         <?php endif; ?>
                     <?php endif; ?>
                 </div>
