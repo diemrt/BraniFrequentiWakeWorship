@@ -16,56 +16,6 @@ if ($message) {
     unset($_SESSION['message_type']);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $_SESSION['message'] = 'Token CSRF invalido';
-        $_SESSION['message_type'] = 'error';
-        $message = 'Token CSRF invalido';
-        $message_type = 'error';
-    } else {
-        $data = sanitize($_POST['data']);
-        $dateObj = DateTime::createFromFormat('Y-m-d', $data);
-        $oggi = new DateTime();
-        if ($dateObj && $dateObj >= $oggi && in_array($dateObj->format('N'), ['5', '7'])) { // 5=ven, 7=dom
-            if (isset($_POST['brani']) && is_array($_POST['brani'])) {
-                $checked = array_map('intval', $_POST['brani']);
-                if (!empty($_POST['order'])) {
-                    $order_ids = array_map('intval', explode(',', $_POST['order']));
-                    $checked = array_intersect($order_ids, $checked);
-                }
-                $stmt_check = $conn->prepare("SELECT Id FROM Brani WHERE Id = ?");
-                $stmt_insert = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl, OrdineEsecuzione) VALUES (?, ?, ?)");
-                $inseriti = 0;
-                $ordine = 1;
-                foreach ($checked as $id_brano) {
-                    $stmt_check->bind_param('i', $id_brano);
-                    $stmt_check->execute();
-                    if ($stmt_check->get_result()->num_rows > 0) {
-                        $stmt_insert->bind_param('isi', $id_brano, $data, $ordine);
-                        $stmt_insert->execute();
-                        $inseriti++;
-                        $ordine++;
-                    }
-                }
-                $_SESSION['message'] = $inseriti . ' brani registrati per la scaletta';
-                $_SESSION['message_type'] = 'success';
-                header('Location: index.php');
-                exit;
-            } else {
-                $_SESSION['message'] = 'Nessun brano selezionato';
-                $_SESSION['message_type'] = 'error';
-                $message = 'Nessun brano selezionato';
-                $message_type = 'error';
-            }
-        } else {
-            $_SESSION['message'] = 'Data non valida (solo venerdì o domenica future)';
-            $_SESSION['message_type'] = 'error';
-            $message = 'Data non valida (solo venerdì o domenica future)';
-            $message_type = 'error';
-        }
-    }
-}
-
 // Ottieni tutti i brani con ultima data suonata se entro un mese
 $result = $conn->query("SELECT b.Id, b.Titolo, b.Tipologia, MAX(bs.BranoSuonatoIl) as UltimaData
                         FROM Brani b
@@ -110,8 +60,9 @@ while ($row = $result->fetch_assoc()) {
                 <h1 class="text-xl font-bold text-gray-900">Crea Scaletta</h1>
             </div>
 
-            <form method="post" class="space-y-4" id="playlist-form">
+            <form method="post" class="space-y-4" id="playlist-form" action="loading.php">
                 <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                <input type="hidden" name="action" value="create_playlist">
                 <input type="hidden" name="order" id="order" value="">
 
                 <div>

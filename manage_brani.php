@@ -31,65 +31,6 @@ if (isset($_GET['confirm_delete'])) {
     $confirm_brano = $result->fetch_assoc();
 }
 
-// Handle delete
-if (isset($_GET['delete']) && isset($_GET['confirmed'])) {
-    $id = (int)$_GET['delete'];
-    // Check if associated
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM BraniSuonati WHERE IdBrano = ?");
-    $stmt->bind_param('i', $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $count = $result->fetch_row()[0];
-    if ($count == 0) {
-        $stmt = $conn->prepare("DELETE FROM Brani WHERE Id = ?");
-        $stmt->bind_param('i', $id);
-        $stmt->execute();
-        $_SESSION['message'] = 'Brano eliminato con successo';
-        $_SESSION['message_type'] = 'success';
-    } else {
-        $_SESSION['message'] = 'Impossibile eliminare, associato a registrazioni';
-        $_SESSION['message_type'] = 'error';
-    }
-    header('Location: manage_brani.php?title=' . urlencode($title_search) . '&page=' . $page);
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $_SESSION['message'] = 'Token CSRF invalido';
-        $_SESSION['message_type'] = 'error';
-    } elseif (isset($_POST['add'])) {
-        $titolo = sanitize($_POST['titolo']);
-        $tipologia = sanitize($_POST['tipologia']);
-        if (!empty($titolo) && in_array($tipologia, ['Lode', 'Adorazione'])) {
-            $stmt = $conn->prepare("INSERT INTO Brani (titolo, tipologia) VALUES (?, ?)");
-            $stmt->bind_param('ss', $titolo, $tipologia);
-            $stmt->execute();
-            $_SESSION['message'] = 'Brano aggiunto con successo';
-            $_SESSION['message_type'] = 'success';
-        } else {
-            $_SESSION['message'] = 'Dati invalidi';
-            $_SESSION['message_type'] = 'error';
-        }
-    } elseif (isset($_POST['edit'])) {
-        $id = (int)$_POST['id'];
-        $titolo = sanitize($_POST['titolo']);
-        $tipologia = sanitize($_POST['tipologia']);
-        if (!empty($titolo) && in_array($tipologia, ['Lode', 'Adorazione'])) {
-            $stmt = $conn->prepare("UPDATE Brani SET titolo = ?, tipologia = ? WHERE id = ?");
-            $stmt->bind_param('ssi', $titolo, $tipologia, $id);
-            $stmt->execute();
-            $_SESSION['message'] = 'Brano aggiornato con successo';
-            $_SESSION['message_type'] = 'success';
-        } else {
-            $_SESSION['message'] = 'Dati invalidi';
-            $_SESSION['message_type'] = 'error';
-        }
-    }
-    header('Location: manage_brani.php?title=' . urlencode($title_search) . '&page=' . $page);
-    exit;
-}
-
 $count_query = "SELECT COUNT(*) FROM Brani";
 $params = [];
 $types = '';
@@ -159,7 +100,7 @@ if (isset($_GET['edit_id'])) {
                        class="flex-1 px-4 py-3 md:py-4 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium text-gray-900 text-center transition-colors">
                         Annulla
                     </a>
-                    <a href="manage_brani.php?delete=<?php echo $confirm_brano['Id'] ?? $_GET['confirm_delete']; ?>&confirmed=1&title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>" 
+                    <a href="loading.php?action=delete_brano&delete=<?php echo $confirm_brano['Id'] ?? $_GET['confirm_delete']; ?>&confirmed=1&title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>" 
                        class="flex-1 px-4 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg md:rounded-xl font-medium text-center transition-colors">
                         Elimina
                     </a>
@@ -261,8 +202,11 @@ if (isset($_GET['edit_id'])) {
     <!-- Add/Edit Form -->
     <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-6" id="branoForm">
         <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-800"><?php echo $edit_brano ? 'Modifica' : 'Aggiungi'; ?> Brano</h2>
-        <form method="post">
+        <form method="post" action="loading.php">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <input type="hidden" name="action" value="manage_brani">
+            <input type="hidden" name="title_search" value="<?php echo sanitize($title_search); ?>">
+            <input type="hidden" name="page" value="<?php echo $page; ?>">
             <?php if ($edit_brano): ?>
                 <input type="hidden" name="id" value="<?php echo $edit_brano['Id']; ?>">
             <?php endif; ?>

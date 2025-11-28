@@ -30,18 +30,6 @@ if (isset($_GET['confirm_delete'])) {
     $confirm_utente = $result->fetch_assoc();
 }
 
-// Handle delete
-if (isset($_GET['delete']) && isset($_GET['confirmed'])) {
-    $id = (int)$_GET['delete'];
-    $stmt = $conn->prepare("DELETE FROM Utenti WHERE Id = ?");
-    $stmt->bind_param('i', $id);
-    $stmt->execute();
-    $_SESSION['message'] = 'Utente eliminato con successo';
-    $_SESSION['message_type'] = 'success';
-    header('Location: manage_users.php?page=' . $page);
-    exit;
-}
-
 // Get utente for editing if edit_id is set
 $edit_utente = null;
 if (isset($_GET['edit_id'])) {
@@ -51,81 +39,6 @@ if (isset($_GET['edit_id'])) {
     $stmt->execute();
     $result = $stmt->get_result();
     $edit_utente = $result->fetch_assoc();
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $_SESSION['message'] = 'Token CSRF invalido';
-        $_SESSION['message_type'] = 'error';
-    } elseif (isset($_POST['add'])) {
-        $username = sanitize($_POST['username']);
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
-        if (!empty($username) && !empty($password) && $password === $confirm_password) {
-            // Check if username exists
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM Utenti WHERE Username = ?");
-            $stmt->bind_param('s', $username);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $count = $result->fetch_row()[0];
-            if ($count == 0) {
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                $stmt = $conn->prepare("INSERT INTO Utenti (Username, Password) VALUES (?, ?)");
-                $stmt->bind_param('ss', $username, $hashed_password);
-                $stmt->execute();
-                $_SESSION['message'] = 'Utente aggiunto con successo';
-                $_SESSION['message_type'] = 'success';
-            } else {
-                $_SESSION['message'] = 'Username già esistente';
-                $_SESSION['message_type'] = 'error';
-            }
-        } else {
-            $_SESSION['message'] = 'Dati invalidi o password non corrispondenti';
-            $_SESSION['message_type'] = 'error';
-        }
-    } elseif (isset($_POST['edit'])) {
-        $id = (int)$_POST['id'];
-        $username = sanitize($_POST['username']);
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
-        if (!empty($username)) {
-            // Check if username exists for other users
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM Utenti WHERE Username = ? AND Id != ?");
-            $stmt->bind_param('si', $username, $id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $count = $result->fetch_row()[0];
-            if ($count == 0) {
-                if (!empty($password)) {
-                    if ($password === $confirm_password) {
-                        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                        $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Password = ? WHERE Id = ?");
-                        $stmt->bind_param('ssi', $username, $hashed_password, $id);
-                        $stmt->execute();
-                        $_SESSION['message'] = 'Utente aggiornato con successo';
-                        $_SESSION['message_type'] = 'success';
-                    } else {
-                        $_SESSION['message'] = 'Password non corrispondenti';
-                        $_SESSION['message_type'] = 'error';
-                    }
-                } else {
-                    $stmt = $conn->prepare("UPDATE Utenti SET Username = ? WHERE Id = ?");
-                    $stmt->bind_param('si', $username, $id);
-                    $stmt->execute();
-                    $_SESSION['message'] = 'Utente aggiornato con successo';
-                    $_SESSION['message_type'] = 'success';
-                }
-            } else {
-                $_SESSION['message'] = 'Username già esistente';
-                $_SESSION['message_type'] = 'error';
-            }
-        } else {
-            $_SESSION['message'] = 'Dati invalidi';
-            $_SESSION['message_type'] = 'error';
-        }
-    }
-    header('Location: manage_users.php?page=' . $page);
-    exit;
 }
 
 $result = $conn->query("SELECT COUNT(*) FROM Utenti");
@@ -161,7 +74,7 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
                        class="flex-1 px-4 py-3 md:py-4 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium text-gray-900 text-center transition-colors">
                         Annulla
                     </a>
-                    <a href="manage_users.php?delete=<?php echo $_GET['confirm_delete']; ?>&confirmed=1&page=<?php echo $page; ?>" 
+                    <a href="loading.php?action=delete_utente&delete=<?php echo $_GET['confirm_delete']; ?>&confirmed=1&page=<?php echo $page; ?>" 
                        class="flex-1 px-4 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg md:rounded-xl font-medium text-center transition-colors">
                         Elimina
                     </a>
@@ -218,8 +131,10 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
 
     <div class="bg-white shadow-lg rounded-lg p-6" id="utenteForm">
         <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-800"><?php echo $edit_utente ? 'Modifica' : 'Aggiungi'; ?> Utente</h2>
-        <form method="post">
+        <form method="post" action="loading.php">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <input type="hidden" name="action" value="manage_users">
+            <input type="hidden" name="page" value="<?php echo $page; ?>">
             <?php if ($edit_utente): ?>
                 <input type="hidden" name="id" value="<?php echo $edit_utente['Id']; ?>">
             <?php endif; ?>

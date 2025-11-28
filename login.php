@@ -3,19 +3,11 @@ session_start();
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $error = 'Token CSRF invalido';
-    } else {
-        $username = sanitize($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? '';
-        if (login($username, $password)) {
-            header('Location: index.php');
-            exit;
-        } else {
-            $error = 'Credenziali errate';
-        }
-    }
+$error = $_SESSION['message'] ?? '';
+$message_type = $_SESSION['message_type'] ?? 'error';
+if ($error) {
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
 }
 ?>
 
@@ -30,8 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <h2 class="mt-4 text-center text-2xl font-extrabold text-gray-900">Accedi al tuo account</h2>
         </div>
-        <form class="mt-6 space-y-4 bg-white py-6 px-6 shadow-lg rounded-lg" method="post">
+        <form class="mt-6 space-y-4 bg-white py-6 px-6 shadow-lg rounded-lg" method="post" action="loading.php">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <input type="hidden" name="action" value="login">
             <div class="space-y-3">
                 <div>
                     <label for="username" class="sr-only">Username</label>
@@ -42,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input id="password" name="password" type="password" autocomplete="current-password" required class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 text-base min-h-[44px]" placeholder="Password">
                 </div>
             </div>
-            <?php if (isset($error)): ?>
+            <?php if (isset($error) && $error): ?>
                 <div class="rounded-md bg-red-50 p-3">
                     <div class="flex">
                         <div class="flex-shrink-0">

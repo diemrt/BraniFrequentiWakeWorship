@@ -34,20 +34,6 @@ if (isset($_GET['confirm_delete'])) {
     $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
 }
 
-// Handle delete scaletta
-if (isset($_GET['delete_date']) && isset($_GET['confirmed'])) {
-    $delete_date = $_GET['delete_date'];
-    if ($delete_date > $today) {
-        $stmt = $conn->prepare("DELETE FROM BraniSuonati WHERE BranoSuonatoIl = ?");
-        $stmt->bind_param('s', $delete_date);
-        $stmt->execute();
-        $_SESSION['message'] = 'Scaletta eliminata con successo';
-        $_SESSION['message_type'] = 'success';
-        header('Location: index.php?' . $query_string . '&page=' . ($_GET['page'] ?? 1));
-        exit;
-    }
-}
-
 // Handle copy/share request
 $copy_date = $_GET['copy_date'] ?? '';
 if ($copy_date) {
@@ -195,7 +181,7 @@ foreach ($brani as $brano) {
                        class="flex-1 px-4 py-3 md:py-4 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium text-gray-900 text-center transition-colors">
                         Annulla
                     </a>
-                    <a href="index.php?delete_date=<?php echo urlencode($delete_date); ?>&confirmed=1&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                    <a href="loading.php?action=delete_scaletta&delete_date=<?php echo urlencode($delete_date); ?>&query_string=<?php echo urlencode($query_string); ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
                        class="flex-1 px-4 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg md:rounded-xl font-medium text-center transition-colors">
                         Elimina
                     </a>
