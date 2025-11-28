@@ -139,86 +139,71 @@ foreach ($brani as $brano) {
 
 <?php include 'includes/header.php'; ?>
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Ultimi Brani Suonati</h1>
-    <form method="GET" class="mb-8 bg-gray-100 p-4 rounded-lg">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label for="title" class="block text-sm font-medium text-gray-700">Cerca per titolo</label>
-                <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-            </div>
-            <div>
-                <label for="date_from" class="block text-sm font-medium text-gray-700">Data da</label>
-                <input type="date" id="date_from" name="date_from" value="<?php echo sanitize($date_from); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-            </div>
-            <div>
-                <label for="date_to" class="block text-sm font-medium text-gray-700">Data a</label>
-                <input type="date" id="date_to" name="date_to" value="<?php echo sanitize($date_to); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-            </div>
-        </div>
-        <div class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per giorno</label>
-            <div class="flex space-x-2">
-                <label class="flex-1">
-                    <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> onchange="this.form.submit()" class="sr-only">
-                    <span class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 cursor-pointer <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700' : ''; ?>">Venerdì</span>
-                </label>
-                <label class="flex-1">
-                    <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> onchange="this.form.submit()" class="sr-only">
-                    <span class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 cursor-pointer <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700' : ''; ?>">Domenica</span>
-                </label>
-                <label class="flex-1">
-                    <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> onchange="this.form.submit()" class="sr-only">
-                    <span class="block w-full text-center px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 cursor-pointer <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700' : ''; ?>">Entrambi</span>
-                </label>
-            </div>
-        </div>
-        <div class="mt-4">
-            <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Cerca</button>
-            <a href="index.php" class="ml-4 text-gray-600 hover:text-gray-800">Reset</a>
-        </div>
-    </form>
-    <?php foreach ($grouped as $date => $brani_per_data): ?>
-        <div class="mb-8">
-            <div class="flex items-center mb-4">
-                <h2 class="text-2xl font-bold <?php echo ($date > $today) ? 'text-green-700' : 'text-gray-800'; ?>">
-                    <?php
-                        $timestamp = strtotime($date);
-                        $day = date('l', $timestamp);
-                        $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
-                        echo sanitize($date . ' (' . $day_it . ')');
-                    ?>
-                </h2>
-                <?php if ($date > $today): ?>
-                    <span class="bg-green-700 text-white text-xs px-2 py-1 rounded ml-2">Programmata</span>
-                    <button onclick="copyScaletta(<?php echo htmlspecialchars(json_encode($date)); ?>, <?php echo htmlspecialchars(json_encode($day_it)); ?>, <?php echo htmlspecialchars(json_encode(array_column($brani_per_data, 'titolo'))); ?>)" class="ml-4 text-blue-600 hover:text-blue-800" title="Copia scaletta">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                        </svg>
-                    </button>
-                    <?php if (is_logged_in()): ?>
-                        <button onclick="deleteScaletta('<?php echo $date; ?>')" class="ml-4 text-red-600 hover:text-red-800" title="Elimina scaletta">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <?php foreach ($brani_per_data as $brano): ?>
-                    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-200">
-                        <div class="flex items-center mb-4">
-                            <svg class="w-8 h-8 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                            </svg>
-                            <h2 class="text-xl font-semibold text-gray-800"><?php echo sanitize($brano['titolo']); ?></h2>
-                        </div>
-                        <p class="text-gray-600 mb-2"><span class="font-medium">Tipologia:</span> <?php echo sanitize($brano['tipologia']); ?></p>
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Ultimi Brani Suonati</h1>
+    
+    <!-- Search Form - Mobile Optimized -->
+    <div class="mb-6 md:mb-8">
+        <button type="button" class="w-full md:hidden bg-orange-100 text-orange-700 px-4 py-3 rounded-lg font-medium flex items-center justify-between" id="filter-toggle">
+            <span class="flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                <span>Filtri</span>
+            </span>
+            <svg class="w-5 h-5 transition-transform" id="filter-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </button>
+
+        <!-- Collapsible Filter Drawer (Mobile) -->
+        <div id="filter-drawer" class="hidden md:block md:p-0 mt-4 md:mt-0">
+            <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4 md:space-y-0">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
+                        <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" 
+                               placeholder="Es: Amazing Grace"
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base md:text-sm">
                     </div>
-                <?php endforeach; ?>
-            </div>
+                    <div>
+                        <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">Data da</label>
+                        <input type="date" id="date_from" name="date_from" value="<?php echo sanitize($date_from); ?>" 
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                    </div>
+                    <div>
+                        <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">Data a</label>
+                        <input type="date" id="date_to" name="date_to" value="<?php echo sanitize($date_to); ?>" 
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per giorno</label>
+                    <div class="grid grid-cols-3 gap-2 md:flex md:gap-2">
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> class="sr-only">
+                            <span class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium' : ''; ?>">Venerdì</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> class="sr-only">
+                            <span class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium' : ''; ?>">Domenica</span>
+                        </label>
+                        <label class="flex items-center cursor-pointer">
+                            <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> class="sr-only">
+                            <span class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium' : ''; ?>">Entrambi</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-2">
+                    <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-colors">Cerca</button>
+                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-colors">Reset</a>
+                </div>
+            </form>
         </div>
-    <?php endforeach; ?>
+    </div>
+
+    <!-- Results Section -->
     <?php if (empty($brani)): ?>
         <div class="text-center py-12">
             <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,24 +211,89 @@ foreach ($brani as $brano) {
             </svg>
             <p class="text-gray-500 text-lg">Nessun brano trovato.</p>
         </div>
+    <?php else: ?>
+        <?php foreach ($grouped as $date => $brani_per_data): ?>
+            <div class="mb-6 md:mb-8">
+                <!-- Date Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl md:text-2xl font-bold <?php echo ($date > $today) ? 'text-green-700' : 'text-gray-800'; ?>">
+                        <?php
+                            $timestamp = strtotime($date);
+                            $day = date('l', $timestamp);
+                            $day_it = ($day == 'Friday') ? 'Venerdì' : 'Domenica';
+                            echo sanitize($date . ' (' . $day_it . ')');
+                        ?>
+                    </h2>
+                    <div class="flex items-center space-x-2">
+                        <?php if ($date > $today): ?>
+                            <span class="bg-green-700 text-white text-xs px-2 py-1 rounded">Programmata</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <?php if ($date > $today): ?>
+                        <button onclick="copyScaletta(<?php echo htmlspecialchars(json_encode($date)); ?>, <?php echo htmlspecialchars(json_encode($day_it)); ?>, <?php echo htmlspecialchars(json_encode(array_column($brani_per_data, 'titolo'))); ?>)" 
+                                class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base" 
+                                title="Condividi o copia scaletta">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="hidden md:inline">Copia</span>
+                        </button>
+                        <?php if (is_logged_in()): ?>
+                            <button onclick="deleteScaletta('<?php echo $date; ?>')" 
+                                    class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base" 
+                                    title="Elimina scaletta">
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                <span class="hidden md:inline">Elimina</span>
+                            </button>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Song Grid - Responsive -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <?php foreach ($brani_per_data as $brano): ?>
+                        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 md:p-6 border border-gray-200">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-6 h-6 md:w-8 md:h-8 text-orange-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                </svg>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm md:text-base font-semibold text-gray-800 break-words"><?php echo sanitize($brano['titolo']); ?></h3>
+                                    <p class="text-xs md:text-sm text-gray-600 mt-1"><?php echo sanitize($brano['tipologia']); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
     <?php endif; ?>
 
+    <!-- Pagination -->
     <?php if ($total_pages > 1): ?>
-    <div class="flex justify-center space-x-2 mt-4 mb-8">
+    <div class="flex justify-center gap-2 mt-8 mb-4 flex-wrap">
         <?php if ($page > 1): ?>
-            <a href="?<?php echo $query_string; ?>&page=<?php echo $page - 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $page - 1; ?>" class="flex items-center px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Precedente
+                <span class="hidden md:inline">Precedente</span>
             </a>
         <?php endif; ?>
-        <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-            <a href="?<?php echo $query_string; ?>&page=<?php echo $i; ?>" class="px-4 py-2 text-sm font-medium rounded-md <?php echo $i == $page ? 'text-orange-600 bg-orange-50 border border-orange-500' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'; ?>"><?php echo $i; ?></a>
-        <?php endfor; ?>
+        
+        <div class="flex items-center gap-1 md:gap-2">
+            <span class="text-xs md:text-sm text-gray-600">Pagina <?php echo $page; ?> di <?php echo $total_pages; ?></span>
+        </div>
+        
         <?php if ($page < $total_pages): ?>
-            <a href="?<?php echo $query_string; ?>&page=<?php echo $page + 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                Successivo
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $page + 1; ?>" class="flex items-center px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                <span class="hidden md:inline">Successivo</span>
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -252,4 +302,26 @@ foreach ($brani as $brano) {
     </div>
     <?php endif; ?>
 </div>
+
+<script>
+    // Mobile filter toggle
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterDrawer = document.getElementById('filter-drawer');
+    const filterIcon = document.getElementById('filter-toggle-icon');
+
+    if (filterToggle && filterDrawer) {
+        filterToggle.addEventListener('click', function() {
+            filterDrawer.classList.toggle('hidden');
+            filterIcon.style.transform = filterDrawer.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        // Auto-show drawer if filters are active
+        const hasFilters = '<?php echo $title_search . $date_from . $date_to; ?>' !== '';
+        if (hasFilters) {
+            filterDrawer.classList.remove('hidden');
+            filterIcon.style.transform = 'rotate(180deg)';
+        }
+    }
+</script>
+
 <?php include 'includes/footer.php'; ?>

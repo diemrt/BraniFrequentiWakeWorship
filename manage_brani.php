@@ -100,116 +100,158 @@ $query_string = http_build_query(['title' => $title_search]);
 
 <?php include 'includes/header.php'; ?>
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Gestione Brani</h1>
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Gestione Brani</h1>
+    
     <?php if ($message): ?>
-        <div class="mb-4 p-4 rounded-md <?php echo strpos($message, 'eliminato') !== false || strpos($message, 'aggiunto') !== false || strpos($message, 'aggiornato') !== false ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'; ?>">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <?php if (strpos($message, 'eliminato') !== false || strpos($message, 'aggiunto') !== false || strpos($message, 'aggiornato') !== false): ?>
-                        <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    <?php else: ?>
-                        <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                    <?php endif; ?>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium"><?php echo $message; ?></p>
-                </div>
-            </div>
-        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                new Toast('<?php echo htmlspecialchars($message, ENT_QUOTES); ?>', '<?php echo strpos($message, 'eliminato') !== false || strpos($message, 'aggiunto') !== false || strpos($message, 'aggiornato') !== false ? 'success' : 'error'; ?>');
+            });
+        </script>
     <?php endif; ?>
 
-    <form method="GET" class="mb-8 bg-gray-100 p-4 rounded-lg">
-        <div>
-            <label for="title" class="block text-sm font-medium text-gray-700">Cerca per titolo</label>
-            <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
-        </div>
-        <div class="mt-4">
-            <button type="submit" class="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700">Cerca</button>
-            <a href="manage_brani.php" class="ml-4 text-gray-600 hover:text-gray-800">Reset</a>
-        </div>
-    </form>
+    <!-- Search Form -->
+    <div class="mb-6 md:mb-8">
+        <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4 md:space-y-0">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
+                    <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" 
+                           placeholder="Es: Amazing Grace"
+                           class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                </div>
+                <div class="flex gap-2 md:items-end">
+                    <button type="submit" class="flex-1 md:flex-initial px-4 py-2 md:py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-md font-medium transition-colors">Cerca</button>
+                    <a href="manage_brani.php" class="flex-1 md:flex-initial text-center px-4 py-2 md:py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md font-medium transition-colors">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
 
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+    <!-- Brani List - Mobile Optimized Cards -->
+    <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-6 mb-8">
+        <?php if (empty($brani)): ?>
+            <div class="col-span-2 text-center py-12">
+                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-.98-5.5-2.5"></path>
+                </svg>
+                <p class="text-gray-500 text-lg">Nessun brano trovato.</p>
+            </div>
+        <?php else: ?>
             <?php foreach ($brani as $brano): ?>
-                <div class="bg-gray-50 rounded-lg p-4 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2"><?php echo sanitize($brano['Titolo']); ?></h3>
-                    <p class="text-gray-600 mb-4">Tipologia: <?php echo sanitize($brano['Tipologia']); ?></p>
-                    <div class="flex space-x-2">
-                        <button onclick="editBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>', '<?php echo $brano['Tipologia']; ?>')" class="inline-flex items-center px-3 py-1 text-sm font-medium text-orange-600 bg-orange-100 rounded-md hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                <div class="bg-white rounded-lg border border-gray-200 p-4 md:p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm md:text-base font-semibold text-gray-900 break-words"><?php echo sanitize($brano['Titolo']); ?></h3>
+                            <p class="text-xs md:text-sm text-gray-600 mt-1">
+                                <span class="inline-block px-2 py-1 bg-gray-100 rounded text-gray-700">
+                                    <?php echo sanitize($brano['Tipologia']); ?>
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <!-- Action Menu Button -->
+                        <button class="action-menu-toggle flex-shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors" 
+                                data-brano-id="<?php echo $brano['Id']; ?>"
+                                data-brano-title="<?php echo htmlspecialchars($brano['Titolo'], ENT_QUOTES); ?>"
+                                data-brano-type="<?php echo htmlspecialchars($brano['Tipologia'], ENT_QUOTES); ?>">
+                            <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 8c1.1 0 2-1 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                             </svg>
-                            Modifica
                         </button>
-                        <a href="?<?php echo $query_string; ?>&delete=<?php echo $brano['Id']; ?>" onclick="return confirm('Sicuro di voler eliminare questo brano?')" class="inline-flex items-center px-3 py-1 text-sm font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                            Elimina
-                        </a>
+                    </div>
+                    
+                    <!-- Hidden action menu (shown on click) -->
+                    <div class="action-menu hidden absolute bg-white border border-gray-200 rounded-lg shadow-lg z-40" 
+                         style="min-width: 160px;">
+                        <button class="edit-btn w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-200 text-sm text-gray-700 font-medium">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span>Modifica</span>
+                            </div>
+                        </button>
+                        <button class="delete-btn w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-600 font-medium">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                <span>Elimina</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             <?php endforeach; ?>
-        </div>
+        <?php endif; ?>
     </div>
 
-    <div class="flex justify-center space-x-2 mb-8">
+    <!-- Pagination -->
+    <?php if ($total_pages > 1): ?>
+    <div class="flex justify-center gap-2 mb-8 flex-wrap">
         <?php if ($page > 1): ?>
-            <a href="?<?php echo $query_string; ?>&page=<?php echo $page - 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $page - 1; ?>" class="flex items-center px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
-                Precedente
+                <span class="hidden md:inline">Precedente</span>
             </a>
         <?php endif; ?>
-        <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-            <a href="?<?php echo $query_string; ?>&page=<?php echo $i; ?>" class="px-4 py-2 text-sm font-medium rounded-md <?php echo $i == $page ? 'text-orange-600 bg-orange-50 border border-orange-500' : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'; ?>"><?php echo $i; ?></a>
-        <?php endfor; ?>
+        
+        <div class="flex items-center gap-1 md:gap-2">
+            <span class="text-xs md:text-sm text-gray-600">Pagina <?php echo $page; ?> di <?php echo $total_pages; ?></span>
+        </div>
+        
         <?php if ($page < $total_pages): ?>
-            <a href="?<?php echo $query_string; ?>&page=<?php echo $page + 1; ?>" class="flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
-                Successivo
+            <a href="?<?php echo $query_string; ?>&page=<?php echo $page + 1; ?>" class="flex items-center px-3 py-2 md:px-4 md:py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                <span class="hidden md:inline">Successivo</span>
                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </a>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 
-    <div class="bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Aggiungi/Modifica Brano</h2>
+    <!-- Add/Edit Form -->
+    <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-6">
+        <h2 class="text-xl md:text-2xl font-bold mb-6 text-gray-800">Aggiungi/Modifica Brano</h2>
         <form method="post" id="branoForm">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
             <input type="hidden" name="id" id="branoId">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                    <label for="titolo" class="block text-sm font-medium text-gray-700 mb-1">Titolo</label>
-                    <input type="text" name="titolo" id="titolo" placeholder="Titolo del brano" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" required>
+                    <label for="titolo" class="block text-sm font-medium text-gray-700 mb-2">Titolo</label>
+                    <input type="text" name="titolo" id="titolo" placeholder="Titolo del brano" 
+                           class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" 
+                           required>
                 </div>
                 <div>
-                    <label for="tipologia" class="block text-sm font-medium text-gray-700 mb-1">Tipologia</label>
-                    <select name="tipologia" id="tipologia" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" required>
+                    <label for="tipologia" class="block text-sm font-medium text-gray-700 mb-2">Tipologia</label>
+                    <select name="tipologia" id="tipologia" 
+                            class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" 
+                            required>
                         <option value="Lode">Lode</option>
                         <option value="Adorazione">Adorazione</option>
                     </select>
                 </div>
             </div>
-            <div class="flex">
-                <button type="submit" name="add" id="addBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+            <div class="flex flex-col md:flex-row gap-3">
+                <button type="submit" name="add" id="addBtn" 
+                        class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg md:rounded-md font-medium transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
-                    Aggiungi
+                    <span>Aggiungi</span>
                 </button>
-                <button type="submit" name="edit" id="editBtn" class="hidden inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="submit" name="edit" id="editBtn" 
+                        class="hidden flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg md:rounded-md font-medium transition-colors">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    Salva Modifiche
+                    <span>Salva Modifiche</span>
                 </button>
             </div>
         </form>
@@ -224,6 +266,79 @@ function editBrano(id, titolo, tipologia) {
     document.getElementById('addBtn').classList.add('hidden');
     document.getElementById('editBtn').classList.remove('hidden');
     document.getElementById('titolo').focus();
+    // Scroll to form
+    document.getElementById('branoForm').scrollIntoView({ behavior: 'smooth' });
 }
+
+function deleteBrano(id, title) {
+    showDeleteModal('Eliminare il brano?', 
+        `Sei sicuro di voler eliminare "${title}"?`,
+        () => {
+            const params = new URLSearchParams(window.location.search);
+            params.set('delete', id);
+            window.location.href = 'manage_brani.php?' + params.toString();
+        });
+}
+
+// Action menu handling
+document.addEventListener('DOMContentLoaded', function() {
+    const toggles = document.querySelectorAll('.action-menu-toggle');
+    
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const card = this.closest('.bg-white');
+            const menu = card.querySelector('.action-menu');
+            
+            // Close other menus
+            document.querySelectorAll('.action-menu:not(.hidden)').forEach(m => {
+                if (m !== menu) m.classList.add('hidden');
+            });
+            
+            // Toggle current menu
+            menu.classList.toggle('hidden');
+            
+            // Position menu near button
+            if (!menu.classList.contains('hidden')) {
+                const rect = this.getBoundingClientRect();
+                menu.style.position = 'fixed';
+                menu.style.top = (rect.bottom + 8) + 'px';
+                menu.style.left = (rect.left - 140) + 'px';
+            }
+        });
+    });
+    
+    // Edit buttons
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const toggle = this.closest('.action-menu').previousElementSibling;
+            const id = toggle.dataset.branoId;
+            const title = toggle.dataset.branoTitle;
+            const type = toggle.dataset.branoType;
+            editBrano(id, title, type);
+            this.closest('.action-menu').classList.add('hidden');
+        });
+    });
+    
+    // Delete buttons
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const toggle = this.closest('.action-menu').previousElementSibling;
+            const id = toggle.dataset.branoId;
+            const title = toggle.dataset.branoTitle;
+            deleteBrano(id, title);
+            this.closest('.action-menu').classList.add('hidden');
+        });
+    });
+    
+    // Close menus on outside click
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.action-menu:not(.hidden)').forEach(m => {
+            m.classList.add('hidden');
+        });
+    });
+});
 </script>
+
 <?php include 'includes/footer.php'; ?>

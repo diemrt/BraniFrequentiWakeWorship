@@ -1,1 +1,112 @@
-/* Custom styles if needed */
+/* Mobile-First Responsive Styles */
+
+/* Ensure proper spacing for bottom nav on all pages */
+body {
+    scroll-behavior: smooth;
+}
+
+/* Touch-friendly focus states */
+@media (hover: none) and (pointer: coarse) {
+    button, a[role="button"], input[type="submit"] {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Improved button touch targets */
+button, a[role="button"], input[type="submit"], input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Form input sizes for better mobile input */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="date"],
+select,
+textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+}
+
+/* Sticky header optimization */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    will-change: transform;
+}
+
+/* Bottom nav smooth transitions */
+nav.fixed {
+    will-change: transform;
+}
+
+/* Toast notification positioning */
+#toast-container {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    #toast-container {
+        bottom: 80px !important;
+        left: 16px;
+        right: 16px;
+    }
+    
+    #toast-container > div {
+        pointer-events: auto;
+    }
+}
+
+@media (min-width: 769px) {
+    #toast-container {
+        bottom: 24px;
+        right: 24px;
+        left: auto;
+    }
+}
+
+/* Responsive image handling */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+svg {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Improve readability on mobile */
+@media (max-width: 640px) {
+    body {
+        font-size: 16px;
+    }
+    
+    h1 {
+        font-size: 28px;
+    }
+    
+    h2 {
+        font-size: 22px;
+    }
+    
+    h3 {
+        font-size: 18px;
+    }
+}
+
+/* Action menu positioning */
+.action-menu {
+    will-change: transform;
+}
+
+.action-menu.hidden {
+    display: none;
+}
