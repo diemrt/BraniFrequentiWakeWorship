@@ -144,47 +144,47 @@ foreach ($brani as $brano) {
     <!-- Search Form - Always Visible -->
     <div class="mb-6 md:mb-8">
         <div class="md:p-0">
-            <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4 md:space-y-0">
+            <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
                         <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" 
                                placeholder="Es: Amazing Grace"
-                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base md:text-sm">
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-base md:text-sm">
                     </div>
                     <div>
                         <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">Data da</label>
                         <input type="date" id="date_from" name="date_from" value="<?php echo sanitize($date_from); ?>" 
-                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                     </div>
                     <div>
                         <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">Data a</label>
                         <input type="date" id="date_to" name="date_to" value="<?php echo sanitize($date_to); ?>" 
-                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                     </div>
                 </div>
                 
-                <div>
+                <div class="pt-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per giorno</label>
                     <div class="grid grid-cols-3 gap-2 md:flex md:gap-2">
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> class="sr-only">
-                            <span class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium' : ''; ?>">Venerdì</span>
+                            <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> class="sr-only peer">
+                            <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Venerdì</span>
                         </label>
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> class="sr-only">
-                            <span class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium' : ''; ?>">Domenica</span>
+                            <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> class="sr-only peer">
+                            <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Domenica</span>
                         </label>
                         <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> class="sr-only">
-                            <span class="block w-full text-center px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium' : ''; ?>">Entrambi</span>
+                            <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> class="sr-only peer">
+                            <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Entrambi</span>
                         </label>
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row gap-2">
-                    <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-colors">Cerca</button>
-                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-colors">Reset</a>
+                <div class="flex flex-col md:flex-row gap-3 pt-2">
+                    <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 touch-manipulation shadow-sm hover:shadow-md">Cerca</button>
+                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 touch-manipulation shadow-sm hover:shadow-md">Reset</a>
                 </div>
             </form>
         </div>
