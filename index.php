@@ -4,6 +4,17 @@ require_once 'includes/db.php';
 require_once 'includes/auth.php';
 require_once 'includes/functions.php';
 
+// Gestione toggle filtri
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_filters'])) {
+    $_SESSION['filters_open'] = !($_SESSION['filters_open'] ?? false);
+    // Redirect per evitare re-submit
+    $redirect_params = $_GET;
+    unset($redirect_params['page']);
+    header('Location: index.php?' . http_build_query($redirect_params));
+    exit;
+}
+$filters_open = $_SESSION['filters_open'] ?? false;
+
 // Ottieni parametri di ricerca
 $title_search = $_GET['title'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
@@ -222,8 +233,24 @@ foreach ($brani as $brano) {
         </div>
     <?php endif; ?>
     
-    <!-- Search Form - Always Visible -->
-    <div class="mb-6 md:mb-8">
+    <!-- Search Form - Collapsible -->
+    <div class="mb-6 md:mb-8 relative">
+        <!-- Filter Toggle Button (Thumb Zone) -->
+        <form method="POST">
+            <input type="hidden" name="toggle_filters" value="1">
+            <button type="submit" 
+                    class="fixed bottom-20 right-4 z-40 w-14 h-14 <?php echo $filters_open ? 'bg-green-600 hover:bg-green-700 active:bg-green-800' : 'bg-orange-600 hover:bg-orange-700 active:bg-orange-800'; ?> text-white rounded-full shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center"
+                    aria-label="<?php echo $filters_open ? 'Nascondi filtri' : 'Mostra filtri'; ?>">
+                <svg class="w-6 h-6" 
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Filtri Collapsibili -->
+        <div class="overflow-hidden transition-all duration-300 ease-in-out <?php echo $filters_open ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0'; ?>">
         <form method="POST" action="loading.php" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4">
             <input type="hidden" name="action" value="filter_index">
             <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
@@ -273,6 +300,7 @@ foreach ($brani as $brano) {
                 <button type="submit" class="flex-1 md:flex-initial text-center px-4 py-2 md:py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</button>
             </form>
             </div>
+        </div>
     </div>
 
     <!-- Results Section -->
