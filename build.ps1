@@ -5,7 +5,7 @@ if (Test-Path "dist.zip") {
     Remove-Item "dist.zip" -Force
 }
 
-# Compress PHP files and specified folders into dist.zip
-Compress-Archive -Path *.php, includes, js, css -DestinationPath "dist.zip"
+# Compress all files and folders into dist.zip (excluding build script and dist.zip itself)
+Compress-Archive -Path * -DestinationPath "dist.zip"
 
 Write-Host "dist.zip created successfully."
