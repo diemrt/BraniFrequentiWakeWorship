@@ -125,26 +125,7 @@ while ($row = $result->fetch_assoc()) {
                     </div>
                 </div>
 
-                <?php if ($message): ?>
-                    <div class="rounded-lg p-3 <?php echo strpos($message, 'registrati') !== false ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'; ?>">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <?php if (strpos($message, 'registrati') !== false): ?>
-                                    <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                <?php else: ?>
-                                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                    </svg>
-                                <?php endif; ?>
-                            </div>
-                            <div class="ml-2">
-                                <span class="text-sm font-medium"><?php echo $message; ?></span>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
+
             </form>
         </div>
     </div>
@@ -184,4 +165,11 @@ checkboxes.forEach(cb => cb.addEventListener('change', function() {
 
 updateUI();
 </script>
+<?php if ($message): ?>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    new Toast('<?php echo htmlspecialchars($message, ENT_QUOTES); ?>', '<?php echo strpos($message, 'registrati') !== false ? 'success' : 'error'; ?>');
+});
+</script>
+<?php endif; ?>
 <?php include 'includes/footer.php'; ?>
