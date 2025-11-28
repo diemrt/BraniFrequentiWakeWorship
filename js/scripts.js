@@ -1,8 +1,8 @@
 // Minimal JavaScript - only essential functionality
 // Most logic has been moved to PHP for better mobile compatibility
 
-// Close modals on backdrop click (for mobile)
 document.addEventListener('DOMContentLoaded', function() {
+    // Close modals on backdrop click (for mobile)
     const modals = document.querySelectorAll('[id$="-modal"]');
     modals.forEach(modal => {
         modal.addEventListener('click', function(e) {
