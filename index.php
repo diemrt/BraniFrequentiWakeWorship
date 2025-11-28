@@ -150,17 +150,17 @@ foreach ($brani as $brano) {
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
                         <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" 
                                placeholder="Es: Amazing Grace"
-                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-base md:text-sm">
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-base md:text-sm min-h-[44px]">
                     </div>
                     <div>
                         <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">Data da</label>
                         <input type="date" id="date_from" name="date_from" value="<?php echo sanitize($date_from); ?>" 
-                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]">
                     </div>
                     <div>
                         <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">Data a</label>
                         <input type="date" id="date_to" name="date_to" value="<?php echo sanitize($date_to); ?>" 
-                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                               class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]">
                     </div>
                 </div>
                 
@@ -183,8 +183,8 @@ foreach ($brani as $brano) {
                 </div>
 
                 <div class="flex flex-col md:flex-row gap-3 pt-2">
-                    <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 touch-manipulation shadow-sm hover:shadow-md">Cerca</button>
-                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 touch-manipulation shadow-sm hover:shadow-md">Reset</a>
+                    <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Cerca</button>
+                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</a>
                 </div>
             </form>
         </div>
@@ -222,7 +222,7 @@ foreach ($brani as $brano) {
                 <div class="flex gap-2 mb-4 flex-wrap">
                     <?php if ($date > $today): ?>
                         <button onclick="copyScaletta(<?php echo htmlspecialchars(json_encode($date)); ?>, <?php echo htmlspecialchars(json_encode($day_it)); ?>, <?php echo htmlspecialchars(json_encode(array_column($brani_per_data, 'titolo'))); ?>)" 
-                                class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base" 
+                                class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
                                 title="Condividi o copia scaletta">
                             <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
@@ -231,7 +231,7 @@ foreach ($brani as $brano) {
                         </button>
                         <?php if (is_logged_in()): ?>
                             <button onclick="deleteScaletta('<?php echo $date; ?>')" 
-                                    class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base" 
+                                    class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
                                     title="Elimina scaletta">
                                 <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>

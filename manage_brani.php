@@ -118,11 +118,11 @@ $query_string = http_build_query(['title' => $title_search]);
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
                     <input type="text" id="title" name="title" value="<?php echo sanitize($title_search); ?>" 
                            placeholder="Es: Amazing Grace"
-                           class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500">
+                           class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]">
                 </div>
                 <div class="flex gap-2 md:items-end">
-                    <button type="submit" class="flex-1 md:flex-initial px-4 py-2 md:py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-md font-medium transition-colors">Cerca</button>
-                    <a href="manage_brani.php" class="flex-1 md:flex-initial text-center px-4 py-2 md:py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md font-medium transition-colors">Reset</a>
+                    <button type="submit" class="flex-1 md:flex-initial px-4 py-2 md:py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Cerca</button>
+                    <a href="manage_brani.php" class="flex-1 md:flex-initial text-center px-4 py-2 md:py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</a>
                 </div>
             </div>
         </form>
@@ -154,14 +154,14 @@ $query_string = http_build_query(['title' => $title_search]);
                     <!-- Action Buttons - Always Visible -->
                     <div class="flex gap-2 mt-3">
                         <button onclick="editBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>', '<?php echo addslashes($brano['Tipologia']); ?>')" 
-                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm">
+                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm min-h-[44px] select-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                             </svg>
                             <span>Modifica</span>
                         </button>
                         <button onclick="deleteBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>')" 
-                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm">
+                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm min-h-[44px] select-none">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
@@ -211,13 +211,13 @@ $query_string = http_build_query(['title' => $title_search]);
                 <div>
                     <label for="titolo" class="block text-sm font-medium text-gray-700 mb-2">Titolo</label>
                     <input type="text" name="titolo" id="titolo" placeholder="Titolo del brano" 
-                           class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" 
+                           class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]" 
                            required>
                 </div>
                 <div>
                     <label for="tipologia" class="block text-sm font-medium text-gray-700 mb-2">Tipologia</label>
                     <select name="tipologia" id="tipologia" 
-                            class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" 
+                            class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]" 
                             required>
                         <option value="Lode">Lode</option>
                         <option value="Adorazione">Adorazione</option>
@@ -227,14 +227,14 @@ $query_string = http_build_query(['title' => $title_search]);
 
             <div class="flex flex-col md:flex-row gap-3">
                 <button type="submit" name="add" id="addBtn" 
-                        class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg md:rounded-md font-medium transition-colors">
+                        class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
                     <span>Aggiungi</span>
                 </button>
                 <button type="submit" name="edit" id="editBtn" 
-                        class="hidden flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg md:rounded-md font-medium transition-colors">
+                        class="hidden flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>

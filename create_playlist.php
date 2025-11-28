@@ -92,7 +92,7 @@ while ($row = $result->fetch_assoc()) {
 
                 <div>
                     <label for="data" class="block text-sm font-medium text-gray-700 mb-2">Data della Scaletta</label>
-                    <input type="date" name="data" id="data" min="<?php echo date('Y-m-d'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500" required>
+                    <input type="date" name="data" id="data" min="<?php echo date('Y-m-d'); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]" required>
                     <p class="text-xs text-gray-500 mt-1">Solo venerdì e domeniche future</p>
                 </div>
 
@@ -142,7 +142,7 @@ while ($row = $result->fetch_assoc()) {
                 <?php endif; ?>
 
                 <div class="mt-6">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150 ease-in-out">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150 ease-in-out min-h-[44px] min-w-[44px] select-none">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>

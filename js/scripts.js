@@ -148,33 +148,3 @@ function fallbackCopyTextToClipboard(text) {
     }
     document.body.removeChild(textArea);
 }
-
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-    
-    @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
-    
-    @keyframes zoomIn {
-        from { transform: scale(0.9); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
-    }
-    
-    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-    .animate-fade-out { animation: fadeOut 0.3s ease-out; }
-    .animate-slide-up { animation: slideUp 0.3s ease-out; }
-    .animate-zoom-in { animation: zoomIn 0.3s ease-out; }
-`;
-document.head.appendChild(style);

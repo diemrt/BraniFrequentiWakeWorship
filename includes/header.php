@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-gray-50 text-gray-900 pb-20 md:pb-0">
+<body class="bg-gray-50 text-gray-900 pb-20 md:pb-0 scroll-smooth text-base">
     <?php session_start(); ?>
-    <header class="bg-gradient-to-r from-orange-600 to-orange-800 text-white shadow-lg sticky top-0 z-30">
+    <header class="bg-gradient-to-r from-orange-600 to-orange-800 text-white shadow-lg sticky top-0 z-30 will-change-transform">
         <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="index.php" class="text-lg md:text-xl font-bold flex items-center space-x-2">
                 <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@
     </header>
 
     <!-- Mobile Bottom Tab Navigation - Always Visible -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 will-change-transform">
         <div class="flex justify-around h-16">
             <a href="index.php" class="nav-tab flex flex-col items-center justify-center flex-1 text-gray-600 hover:bg-gray-50 transition-colors <?php echo (basename($_SERVER['PHP_SELF']) === 'index.php' || basename($_SERVER['PHP_SELF']) === '') ? 'text-orange-600 border-t-2 border-orange-600' : ''; ?>">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
