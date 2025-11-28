@@ -225,7 +225,9 @@ foreach ($brani as $brano) {
     <!-- Search Form - Always Visible -->
     <div class="mb-6 md:mb-8">
         <div class="md:p-0">
-            <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4">
+            <form method="POST" action="loading.php" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4">
+                <input type="hidden" name="action" value="filter_index">
+                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
@@ -265,9 +267,13 @@ foreach ($brani as $brano) {
 
                 <div class="flex flex-col md:flex-row gap-3 pt-2">
                     <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Cerca</button>
-                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</a>
+                </form>
+                <form method="POST" action="loading.php" style="display: inline;">
+                    <input type="hidden" name="action" value="filter_index">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                    <button type="submit" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</button>
+                </form>
                 </div>
-            </form>
         </div>
     </div>
 

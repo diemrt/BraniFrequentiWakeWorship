@@ -111,7 +111,10 @@ if (isset($_GET['edit_id'])) {
 
     <!-- Search Form -->
     <div class="mb-6 md:mb-8">
-        <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4 md:space-y-0">
+        <form method="POST" action="loading.php" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4 md:space-y-0">
+            <input type="hidden" name="action" value="filter_manage_brani">
+            <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+            <input type="hidden" name="page" value="1">
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
                     <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Cerca per titolo</label>
@@ -121,10 +124,15 @@ if (isset($_GET['edit_id'])) {
                 </div>
                 <div class="flex gap-2 md:items-end">
                     <button type="submit" class="flex-1 md:flex-initial px-4 py-2 md:py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Cerca</button>
-                    <a href="manage_brani.php" class="flex-1 md:flex-initial text-center px-4 py-2 md:py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</a>
+                </form>
+                <form method="POST" action="loading.php" style="display: inline;">
+                    <input type="hidden" name="action" value="filter_manage_brani">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                    <input type="hidden" name="page" value="1">
+                    <button type="submit" class="flex-1 md:flex-initial text-center px-4 py-2 md:py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</button>
+                </form>
                 </div>
             </div>
-        </form>
     </div>
 
     <!-- Brani List - Mobile Optimized Cards -->

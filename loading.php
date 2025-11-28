@@ -103,6 +103,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['message_type'] = 'error';
             }
         }
+    } elseif ($action === 'filter_index') {
+        // Gestione filtri index.php
+        if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+            $_SESSION['message'] = 'Token CSRF invalido';
+            $_SESSION['message_type'] = 'error';
+            $redirect = 'index.php';
+        } else {
+            $title = $_POST['title'] ?? '';
+            $date_from = $_POST['date_from'] ?? '';
+            $date_to = $_POST['date_to'] ?? '';
+            $day = $_POST['day'] ?? 'entrambi';
+            $page = $_POST['page'] ?? 1;
+            
+            $redirect = 'index.php?' . http_build_query([
+                'title' => $title,
+                'date_from' => $date_from,
+                'date_to' => $date_to,
+                'day' => $day,
+                'page' => $page
+            ]);
+        }
+    } elseif ($action === 'filter_manage_brani') {
+        // Gestione filtri manage_brani.php
+        if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+            $_SESSION['message'] = 'Token CSRF invalido';
+            $_SESSION['message_type'] = 'error';
+            $redirect = 'manage_brani.php';
+        } else {
+            $title = $_POST['title'] ?? '';
+            $page = $_POST['page'] ?? 1;
+            
+            $redirect = 'manage_brani.php?' . http_build_query([
+                'title' => $title,
+                'page' => $page
+            ]);
+        }
     } elseif ($action === 'manage_users') {
         $page = $_POST['page'] ?? 1;
         $redirect = 'manage_users.php?page=' . $page;
