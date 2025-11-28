@@ -74,9 +74,9 @@ while ($row = $result->fetch_assoc()) {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">Seleziona Brani (l'ordine di selezione determinerà l'ordine di esecuzione)</label>
                     <div class="space-y-2">
-                        <?php foreach ($brani as $brano): ?>
+                        <?php foreach ($brani as $index => $brano): ?>
                             <label for="brano_<?php echo $brano['id']; ?>" class="block cursor-pointer">
-                                <input type="checkbox" name="brani[]" value="<?php echo $brano['id']; ?>" id="brano_<?php echo $brano['id']; ?>" class="hidden peer">
+                                <input type="checkbox" name="brani[]" value="<?php echo $brano['id']; ?>" id="brano_<?php echo $brano['id']; ?>" class="hidden peer brano-checkbox" data-order="">
                                 <div class="min-h-[48px] p-3 border-2 border-gray-200 rounded-lg peer-checked:border-orange-500 peer-checked:bg-orange-50 active:scale-[0.98] transition-all">
                                     <div class="font-medium text-sm text-gray-900">
                                         <?php echo sanitize($brano['titolo']); ?>
@@ -115,21 +115,27 @@ while ($row = $result->fetch_assoc()) {
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+// Gestione ordine brani - logica semplificata
+(function() {
     var order = [];
-    document.querySelectorAll('input[name="brani[]"]').forEach(function(cb) {
+    var orderInput = document.getElementById('order');
+    
+    if (!orderInput) return; // Fallback se l'elemento non esiste
+    
+    var checkboxes = document.querySelectorAll('.brano-checkbox');
+    if (!checkboxes.length) return; // Fallback se non ci sono checkbox
+    
+    checkboxes.forEach(function(cb) {
         cb.addEventListener('change', function() {
             if (this.checked) {
-                if (!order.includes(this.value)) {
-                    order.push(this.value);
-                }
+                order.push(this.value);
             } else {
-                order = order.filter(id => id != this.value);
+                order = order.filter(function(id) { return id !== this.value; }, this);
             }
-            document.getElementById('order').value = order.join(',');
+            orderInput.value = order.join(',');
         });
     });
-});
+})();
 </script>
 
 <?php include 'includes/footer.php'; ?>

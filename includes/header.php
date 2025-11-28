@@ -16,7 +16,6 @@
     </head>
 
 <body class="bg-gray-50 text-gray-900 pb-20 md:pb-0 scroll-smooth text-base">
-    <?php session_start(); ?>
     <header class="bg-gradient-to-r from-orange-600 to-orange-800 text-white shadow-lg sticky top-0 z-30 will-change-transform">
         <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="navigate.php?to=index.php" class="text-lg md:text-xl font-bold flex items-center space-x-2">
