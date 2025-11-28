@@ -33,44 +33,28 @@ echo '<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Caricamento...</title>
     <meta http-equiv="refresh" content="0.3;url=' . htmlspecialchars($target, ENT_QUOTES, 'UTF-8') . '">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background: #f3f4f6;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .loading {
-            font-size: 24px;
-            color: #ea580c;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ea580c;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-spin { animation: spin 0.8s linear infinite; }
+        .animate-pulse-slow { animation: pulse-slow 1.5s ease-in-out infinite; }
     </style>
 </head>
-<body>
-    <div>
-        <div class="spinner"></div>
-        <div class="loading">Caricamento...</div>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="flex flex-col items-center justify-center space-y-6">
+        <!-- Spinner -->
+        <div class="w-16 h-16 border-4 border-gray-200 border-t-orange-600 rounded-full animate-spin"></div>
+        <!-- Loading Text -->
+        <p class="text-2xl font-semibold text-orange-600">Caricamento...</p>
     </div>
 </body>
 </html>';

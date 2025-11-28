@@ -242,44 +242,46 @@ echo '<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caricamento...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elaborazione...</title>
     <meta http-equiv="refresh" content="1;url=' . $redirect . '">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
-            background: #f3f4f6;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .loading {
-            font-size: 24px;
-            color: #ea580c;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ea580c;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        .animate-spin { animation: spin 0.8s linear infinite; }
+        .animate-pulse-slow { animation: pulse-slow 1.5s ease-in-out infinite; }
+        .progress-bar { animation: progress 1s ease-out forwards; }
     </style>
 </head>
-<body>
-    <div>
-        <div class="spinner"></div>
-        <div class="loading">Caricamento in corso...</div>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm">
+        <div class="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+            <!-- Spinner -->
+            <div class="flex justify-center">
+                <div class="w-20 h-20 border-4 border-gray-200 border-t-orange-600 rounded-full animate-spin"></div>
+            </div>
+            
+            <!-- Loading Text -->
+            <div class="text-center space-y-3">
+                <h2 class="text-2xl font-bold text-gray-800">Elaborazione</h2>
+                <p class="text-sm text-gray-500">Attendere prego...</p>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="progress-bar h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
+            </div>
+        </div>
     </div>
 </body>
 </html>';
