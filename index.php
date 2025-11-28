@@ -212,7 +212,7 @@ foreach ($brani as $brano) {
                         ?>
                     </h2>
                     <div class="flex items-center space-x-2">
-                        <?php if ($date > $today): ?>
+                        <?php if ($date >= $today): ?>
                             <span class="bg-green-700 text-white text-xs px-2 py-1 rounded">Programmata</span>
                         <?php endif; ?>
                     </div>
@@ -220,7 +220,7 @@ foreach ($brani as $brano) {
 
                 <!-- Action Buttons -->
                 <div class="flex gap-2 mb-4 flex-wrap">
-                    <?php if ($date > $today): ?>
+                    <?php if ($date >= $today): ?>
                         <button onclick="copyScaletta(<?php echo htmlspecialchars(json_encode($date)); ?>, <?php echo htmlspecialchars(json_encode($day_it)); ?>, <?php echo htmlspecialchars(json_encode(array_column($brani_per_data, 'titolo'))); ?>)" 
                                 class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
                                 title="Condividi o copia scaletta">
