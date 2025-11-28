@@ -29,6 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($dateObj && $dateObj >= $oggi && in_array($dateObj->format('N'), ['5', '7'])) { // 5=ven, 7=dom
             if (isset($_POST['brani']) && is_array($_POST['brani'])) {
                 $checked = array_map('intval', $_POST['brani']);
+                if (!empty($_POST['order'])) {
+                    $order_ids = array_map('intval', explode(',', $_POST['order']));
+                    $checked = array_intersect($order_ids, $checked);
+                }
                 $stmt_check = $conn->prepare("SELECT Id FROM Brani WHERE Id = ?");
                 $stmt_insert = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl, OrdineEsecuzione) VALUES (?, ?, ?)");
                 $inseriti = 0;
@@ -108,6 +112,7 @@ while ($row = $result->fetch_assoc()) {
 
             <form method="post" class="space-y-4" id="playlist-form">
                 <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                <input type="hidden" name="order" id="order" value="">
 
                 <div>
                     <label for="data" class="block text-sm font-medium text-gray-700 mb-2">Data della Scaletta</label>
@@ -157,5 +162,23 @@ while ($row = $result->fetch_assoc()) {
         Salva Scaletta
     </button>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var order = [];
+    document.querySelectorAll('input[name="brani[]"]').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            if (this.checked) {
+                if (!order.includes(this.value)) {
+                    order.push(this.value);
+                }
+            } else {
+                order = order.filter(id => id != this.value);
+            }
+            document.getElementById('order').value = order.join(',');
+        });
+    });
+});
+</script>
 
 <?php include 'includes/footer.php'; ?>
