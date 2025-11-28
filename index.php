@@ -267,13 +267,9 @@ foreach ($brani as $brano) {
 
                 <div class="flex flex-col md:flex-row gap-3 pt-2">
                     <button type="submit" class="flex-1 md:flex-initial bg-orange-600 hover:bg-orange-700 active:bg-orange-800 text-white px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Cerca</button>
-                </form>
-                <form method="POST" action="loading.php" style="display: inline;">
-                    <input type="hidden" name="action" value="filter_index">
-                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-                    <button type="submit" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</button>
-                </form>
+                    <a href="index.php" class="flex-1 md:flex-initial text-center bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 px-4 py-3 md:py-2 rounded-md font-medium transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md min-h-[44px] min-w-[44px] inline-flex items-center justify-center select-none">Reset</a>
                 </div>
+            </form>
         </div>
     </div>
 
