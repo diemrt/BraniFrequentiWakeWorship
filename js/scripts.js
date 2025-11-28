@@ -42,27 +42,16 @@ class Toast {
 
 // Enhanced delete function with confirmation modal and undo
 function deleteScaletta(date) {
-    showDeleteModal('Eliminare la scaletta?', 
-        `Sei sicuro di voler eliminare la scaletta per il ${date}? Questa azione non può essere annullata.`,
-        () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('delete_date', date);
-            window.location.href = 'index.php?' + urlParams.toString();
-        });
-}
-
-// Delete modal (bottom sheet on mobile)
-function showDeleteModal(title, message, onConfirm) {
     const modalId = 'delete-modal-' + Date.now();
     const modal = document.createElement('div');
     modal.id = modalId;
     modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-end md:items-center md:justify-center animate-fade-in';
     modal.innerHTML = `
         <div class="bg-white w-full md:w-96 rounded-t-2xl md:rounded-2xl p-6 md:p-8 space-y-6 max-h-96 overflow-y-auto animate-slide-up md:animate-zoom-in">
-            <h2 class="text-xl md:text-2xl font-bold text-center text-gray-900">${title}</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-center text-gray-900">Eliminare la scaletta?</h2>
             
             <p class="text-gray-700 text-sm md:text-base">
-                ${message}
+                Sei sicuro di voler eliminare la scaletta per il ${date}? Questa azione non può essere annullata.
             </p>
             
             <div class="flex gap-4">
@@ -70,7 +59,7 @@ function showDeleteModal(title, message, onConfirm) {
                         class="flex-1 px-4 py-3 md:py-4 bg-gray-100 hover:bg-gray-200 rounded-lg md:rounded-xl font-medium text-gray-900 transition-colors">
                     Annulla
                 </button>
-                <button onclick="(${onConfirm.toString()})(); document.getElementById('${modalId}').remove();" 
+                <button onclick="confirmDeleteScaletta('${date}', '${modalId}')" 
                         class="flex-1 px-4 py-3 md:py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg md:rounded-xl font-medium transition-colors">
                     Elimina
                 </button>
@@ -85,6 +74,13 @@ function showDeleteModal(title, message, onConfirm) {
             modal.remove();
         }
     });
+}
+
+function confirmDeleteScaletta(date, modalId) {
+    document.getElementById(modalId).remove();
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('delete_date', date);
+    window.location.href = 'index.php?' + urlParams.toString();
 }
 
 // Copy scaletta with Web Share API and fallback

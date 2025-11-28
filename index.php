@@ -203,7 +203,7 @@ foreach ($brani as $brano) {
             <div class="mb-6 md:mb-8">
                 <!-- Date Header -->
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl md:text-2xl font-bold <?php echo ($date > $today) ? 'text-green-700' : 'text-gray-800'; ?>">
+                    <h2 class="text-xl md:text-2xl font-bold <?php echo ($date >= $today) ? 'text-green-700' : 'text-gray-800'; ?>">
                         <?php
                             $timestamp = strtotime($date);
                             $day = date('l', $timestamp);
