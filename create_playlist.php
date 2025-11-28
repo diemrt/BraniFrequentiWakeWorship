@@ -20,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $_SESSION['message'] = 'Token CSRF invalido';
         $_SESSION['message_type'] = 'error';
+        $message = 'Token CSRF invalido';
+        $message_type = 'error';
     } else {
         $data = sanitize($_POST['data']);
         $dateObj = DateTime::createFromFormat('Y-m-d', $data);
@@ -48,10 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $_SESSION['message'] = 'Nessun brano selezionato';
                 $_SESSION['message_type'] = 'error';
+                $message = 'Nessun brano selezionato';
+                $message_type = 'error';
             }
         } else {
             $_SESSION['message'] = 'Data non valida (solo venerdì o domenica future)';
             $_SESSION['message_type'] = 'error';
+            $message = 'Data non valida (solo venerdì o domenica future)';
+            $message_type = 'error';
         }
     }
 }
