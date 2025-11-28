@@ -149,36 +149,23 @@ $query_string = http_build_query(['title' => $title_search]);
                                 </span>
                             </p>
                         </div>
-                        
-                        <!-- Action Menu Button -->
-                        <button class="action-menu-toggle flex-shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors" 
-                                data-brano-id="<?php echo $brano['Id']; ?>"
-                                data-brano-title="<?php echo htmlspecialchars($brano['Titolo'], ENT_QUOTES); ?>"
-                                data-brano-type="<?php echo htmlspecialchars($brano['Tipologia'], ENT_QUOTES); ?>">
-                            <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 8c1.1 0 2-1 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
-                            </svg>
-                        </button>
                     </div>
                     
-                    <!-- Hidden action menu (shown on click) -->
-                    <div class="action-menu hidden absolute bg-white border border-gray-200 rounded-lg shadow-lg z-40" 
-                         style="min-width: 160px;">
-                        <button class="edit-btn w-full text-left px-4 py-2 hover:bg-gray-50 border-b border-gray-200 text-sm text-gray-700 font-medium">
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                                <span>Modifica</span>
-                            </div>
+                    <!-- Action Buttons - Always Visible -->
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="editBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>', '<?php echo addslashes($brano['Tipologia']); ?>')" 
+                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            <span>Modifica</span>
                         </button>
-                        <button class="delete-btn w-full text-left px-4 py-2 hover:bg-red-50 text-sm text-red-600 font-medium">
-                            <div class="flex items-center space-x-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                                <span>Elimina</span>
-                            </div>
+                        <button onclick="deleteBrano(<?php echo $brano['Id']; ?>, '<?php echo addslashes($brano['Titolo']); ?>')" 
+                                class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            <span>Elimina</span>
                         </button>
                     </div>
                 </div>
@@ -279,66 +266,6 @@ function deleteBrano(id, title) {
             window.location.href = 'manage_brani.php?' + params.toString();
         });
 }
-
-// Action menu handling
-document.addEventListener('DOMContentLoaded', function() {
-    const toggles = document.querySelectorAll('.action-menu-toggle');
-    
-    toggles.forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const card = this.closest('.bg-white');
-            const menu = card.querySelector('.action-menu');
-            
-            // Close other menus
-            document.querySelectorAll('.action-menu:not(.hidden)').forEach(m => {
-                if (m !== menu) m.classList.add('hidden');
-            });
-            
-            // Toggle current menu
-            menu.classList.toggle('hidden');
-            
-            // Position menu near button
-            if (!menu.classList.contains('hidden')) {
-                const rect = this.getBoundingClientRect();
-                menu.style.position = 'fixed';
-                menu.style.top = (rect.bottom + 8) + 'px';
-                menu.style.left = (rect.left - 140) + 'px';
-            }
-        });
-    });
-    
-    // Edit buttons
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const toggle = this.closest('.action-menu').previousElementSibling;
-            const id = toggle.dataset.branoId;
-            const title = toggle.dataset.branoTitle;
-            const type = toggle.dataset.branoType;
-            editBrano(id, title, type);
-            this.closest('.action-menu').classList.add('hidden');
-        });
-    });
-    
-    // Delete buttons
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const toggle = this.closest('.action-menu').previousElementSibling;
-            const id = toggle.dataset.branoId;
-            const title = toggle.dataset.branoTitle;
-            deleteBrano(id, title);
-            this.closest('.action-menu').classList.add('hidden');
-        });
-    });
-    
-    // Close menus on outside click
-    document.addEventListener('click', function() {
-        document.querySelectorAll('.action-menu:not(.hidden)').forEach(m => {
-            m.classList.add('hidden');
-        });
-    });
-});
 </script>
 
 <?php include 'includes/footer.php'; ?>

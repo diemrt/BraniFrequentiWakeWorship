@@ -141,22 +141,9 @@ foreach ($brani as $brano) {
 <div class="max-w-6xl mx-auto">
     <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Ultimi Brani Suonati</h1>
     
-    <!-- Search Form - Mobile Optimized -->
+    <!-- Search Form - Always Visible -->
     <div class="mb-6 md:mb-8">
-        <button type="button" class="w-full md:hidden bg-orange-100 text-orange-700 px-4 py-3 rounded-lg font-medium flex items-center justify-between" id="filter-toggle">
-            <span class="flex items-center space-x-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                <span>Filtri</span>
-            </span>
-            <svg class="w-5 h-5 transition-transform" id="filter-toggle-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-            </svg>
-        </button>
-
-        <!-- Collapsible Filter Drawer (Mobile) -->
-        <div id="filter-drawer" class="hidden md:block md:p-0 mt-4 md:mt-0">
+        <div class="md:p-0">
             <form method="GET" class="bg-gray-100 md:bg-transparent p-4 md:p-0 rounded-lg md:rounded-none space-y-4 md:space-y-0">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -302,26 +289,5 @@ foreach ($brani as $brano) {
     </div>
     <?php endif; ?>
 </div>
-
-<script>
-    // Mobile filter toggle
-    const filterToggle = document.getElementById('filter-toggle');
-    const filterDrawer = document.getElementById('filter-drawer');
-    const filterIcon = document.getElementById('filter-toggle-icon');
-
-    if (filterToggle && filterDrawer) {
-        filterToggle.addEventListener('click', function() {
-            filterDrawer.classList.toggle('hidden');
-            filterIcon.style.transform = filterDrawer.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-        });
-
-        // Auto-show drawer if filters are active
-        const hasFilters = '<?php echo $title_search . $date_from . $date_to; ?>' !== '';
-        if (hasFilters) {
-            filterDrawer.classList.remove('hidden');
-            filterIcon.style.transform = 'rotate(180deg)';
-        }
-    }
-</script>
 
 <?php include 'includes/footer.php'; ?>

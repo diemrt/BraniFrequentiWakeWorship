@@ -10,11 +10,11 @@ class Toast {
     }
 
     show() {
-        // Create toast container if it doesn't exist
+        // Create toast container if it doesn't exist - always in mobile position
         if (!document.getElementById('toast-container')) {
             const container = document.createElement('div');
             container.id = 'toast-container';
-            container.className = 'fixed bottom-20 md:bottom-6 left-4 right-4 md:left-auto md:right-6 z-50 space-y-2 pointer-events-none';
+            container.className = 'fixed bottom-20 left-4 right-4 md:left-auto md:right-6 z-50 space-y-2 pointer-events-none';
             document.body.appendChild(container);
         }
 
@@ -176,12 +176,5 @@ style.textContent = `
     .animate-fade-out { animation: fadeOut 0.3s ease-out; }
     .animate-slide-up { animation: slideUp 0.3s ease-out; }
     .animate-zoom-in { animation: zoomIn 0.3s ease-out; }
-    
-    /* Ensure toast doesn't get cut off by bottom nav on mobile */
-    @media (max-width: 768px) {
-        #toast-container {
-            bottom: 80px !important;
-        }
-    }
 `;
 document.head.appendChild(style);
