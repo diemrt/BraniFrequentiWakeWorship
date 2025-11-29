@@ -1,0 +1,186 @@
+<?php
+session_start();
+require_once 'includes/db.php';
+require_once 'includes/auth.php';
+require_once 'includes/functions.php';
+
+if (!is_logged_in()) {
+    header('Location: login.php');
+    exit;
+}
+
+$message = $_SESSION['message'] ?? '';
+$message_type = $_SESSION['message_type'] ?? 'info';
+if ($message) {
+    unset($_SESSION['message']);
+    unset($_SESSION['message_type']);
+}
+
+// Ottieni tutte le date uniche di scalette passate dai dati in BraniSuonati
+$result_dates = $conn->query("SELECT DISTINCT BranoSuonatoIl 
+                               FROM BraniSuonati 
+                               WHERE BranoSuonatoIl <= CURDATE()
+                               ORDER BY BranoSuonatoIl DESC");
+$dates = [];
+while ($row = $result_dates->fetch_assoc()) {
+    $dates[] = [
+        'data' => $row['BranoSuonatoIl'],
+        'formatted' => (new DateTime($row['BranoSuonatoIl']))->format('d/m/Y')
+    ];
+}
+
+// Ottieni tutti i brani con ultima data suonata se entro un mese
+$result = $conn->query("SELECT b.Id, b.Titolo, b.Tipologia, MAX(bs.BranoSuonatoIl) as UltimaData
+                        FROM Brani b
+                        LEFT JOIN BraniSuonati bs ON b.Id = bs.IdBrano
+                        GROUP BY b.Id, b.Titolo, b.Tipologia
+                        ORDER BY b.Titolo");
+$brani = [];
+while ($row = $result->fetch_assoc()) {
+    $ultima_data = $row['UltimaData'];
+    $warning = '';
+    if ($ultima_data) {
+        $ultima = new DateTime($ultima_data);
+        $un_mese_fa = new DateTime();
+        $un_mese_fa->modify('-1 month');
+        if ($ultima >= $un_mese_fa) {
+            $warning = 'Suonato l\'ultima volta il ' . $ultima->format('d/m/Y');
+        }
+    }
+    $brani[] = [
+        'id' => $row['Id'],
+        'titolo' => $row['Titolo'],
+        'tipologia' => $row['Tipologia'],
+        'warning' => $warning
+    ];
+}
+
+// Se è stata selezionata una data, carica i brani per quella scaletta
+$selected_date = $_GET['data'] ?? '';
+$selected_brani_ids = [];
+if ($selected_date && DateTime::createFromFormat('Y-m-d', $selected_date)) {
+    $result_selected = $conn->prepare("SELECT IdBrano FROM BraniSuonati 
+                                       WHERE BranoSuonatoIl = ? 
+                                       ORDER BY OrdineEsecuzione ASC");
+    $result_selected->bind_param('s', $selected_date);
+    $result_selected->execute();
+    $result_set = $result_selected->get_result();
+    while ($row = $result_set->fetch_assoc()) {
+        $selected_brani_ids[] = $row['IdBrano'];
+    }
+}
+?>
+
+<?php include 'includes/header.php'; ?>
+<div class="container mx-auto px-3 py-4 pb-32 md:pb-8">
+    <div class="max-w-2xl mx-auto">
+        <?php if ($message): ?>
+            <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
+                <p class="<?php echo $message_type === 'success' ? 'text-green-800' : 'text-red-800'; ?> text-sm md:text-base"><?php echo sanitize($message); ?></p>
+            </div>
+        <?php endif; ?>
+        
+        <div class="bg-white shadow-lg rounded-lg p-4">
+            <div class="flex items-center mb-4">
+                <svg class="h-6 w-6 text-orange-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <h1 class="text-xl font-bold text-gray-900">Modifica Scaletta</h1>
+            </div>
+
+            <form method="get" class="space-y-4" id="select-date-form">
+                <div>
+                    <label for="data" class="block text-sm font-medium text-gray-700 mb-2">Seleziona Data Scaletta</label>
+                    <select name="data" id="data" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base min-h-[48px] cursor-pointer" onchange="document.getElementById('select-date-form').submit()">
+                        <option value="">-- Seleziona una data --</option>
+                        <?php foreach ($dates as $date_option): ?>
+                            <option value="<?php echo $date_option['data']; ?>" <?php echo $selected_date === $date_option['data'] ? 'selected' : ''; ?>>
+                                <?php echo $date_option['formatted']; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </form>
+
+            <?php if ($selected_date && count($dates) > 0 && in_array($selected_date, array_column($dates, 'data'))): ?>
+                <form method="post" class="space-y-4" id="playlist-form" action="loading.php">
+                    <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
+                    <input type="hidden" name="action" value="edit_playlist">
+                    <input type="hidden" name="data" value="<?php echo sanitize($selected_date); ?>">
+                    <input type="hidden" name="order" id="order" value="">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Modifica Brani (l'ordine di selezione determinerà l'ordine di esecuzione)</label>
+                        <div class="space-y-2">
+                            <?php foreach ($brani as $index => $brano): ?>
+                                <label for="brano_<?php echo $brano['id']; ?>" class="block cursor-pointer">
+                                    <input type="checkbox" name="brani[]" value="<?php echo $brano['id']; ?>" id="brano_<?php echo $brano['id']; ?>" class="hidden peer brano-checkbox" data-order="" <?php echo in_array($brano['id'], $selected_brani_ids) ? 'checked' : ''; ?>>
+                                    <div class="min-h-[48px] p-3 border-2 border-gray-200 rounded-lg peer-checked:border-orange-500 peer-checked:bg-orange-50 active:scale-[0.98] transition-all">
+                                        <div class="font-medium text-sm text-gray-900">
+                                            <?php echo sanitize($brano['titolo']); ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-0.5">
+                                            <?php echo sanitize($brano['tipologia']); ?>
+                                        </div>
+                                        <?php if ($brano['warning']): ?>
+                                            <div class="text-xs text-yellow-600 mt-1 flex items-center">
+                                                <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <?php echo $brano['warning']; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Fixed Bottom Button (Above Mobile Nav) -->
+                <div class="fixed bottom-20 md:bottom-4 left-0 right-0 px-3 z-50">
+                    <button type="submit" form="playlist-form" class="w-full flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg text-white bg-orange-600 hover:bg-orange-700 active:bg-orange-800 min-h-[48px] select-none transition-colors shadow-2xl">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Salva Modifica
+                    </button>
+                </div>
+            <?php elseif ($selected_date && !(count($dates) > 0 && in_array($selected_date, array_column($dates, 'data')))): ?>
+                <div class="mt-6 p-4 rounded-lg bg-red-50 border border-red-200">
+                    <p class="text-red-800 text-sm md:text-base">Data non valida o nessun brano trovato per questa scaletta.</p>
+                </div>
+            <?php elseif (count($dates) === 0): ?>
+                <div class="mt-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                    <p class="text-yellow-800 text-sm md:text-base">Nessuna scaletta disponibile per la modifica.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<script>
+// Gestione ordine brani - logica semplificata
+(function() {
+    var order = [];
+    var orderInput = document.getElementById('order');
+    
+    if (!orderInput) return; // Fallback se l'elemento non esiste
+    
+    var checkboxes = document.querySelectorAll('.brano-checkbox');
+    if (!checkboxes.length) return; // Fallback se non ci sono checkbox
+    
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            if (this.checked) {
+                order.push(this.value);
+            } else {
+                order = order.filter(function(id) { return id !== this.value; }, this);
+            }
+            orderInput.value = order.join(',');
+        });
+    });
+})();
+</script>
+
+<?php include 'includes/footer.php'; ?>

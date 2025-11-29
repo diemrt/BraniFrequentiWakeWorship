@@ -103,6 +103,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['message_type'] = 'error';
             }
         }
+    } elseif ($action === 'edit_playlist') {
+        $redirect = 'edit_playlist.php';
+        
+        if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+            $_SESSION['message'] = 'Token CSRF invalido';
+            $_SESSION['message_type'] = 'error';
+        } else {
+            $data = sanitize($_POST['data']);
+            $dateObj = DateTime::createFromFormat('Y-m-d', $data);
+            
+            if ($dateObj) {
+                // Verifica che la data esista in BraniSuonati
+                $stmt_check_date = $conn->prepare("SELECT COUNT(*) FROM BraniSuonati WHERE BranoSuonatoIl = ?");
+                $stmt_check_date->bind_param('s', $data);
+                $stmt_check_date->execute();
+                $result = $stmt_check_date->get_result();
+                $count = $result->fetch_row()[0];
+                
+                if ($count > 0) {
+                    // Elimina tutti i brani per questa data
+                    $stmt_delete = $conn->prepare("DELETE FROM BraniSuonati WHERE BranoSuonatoIl = ?");
+                    $stmt_delete->bind_param('s', $data);
+                    $stmt_delete->execute();
+                    
+                    // Inserisci i nuovi brani
+                    if (isset($_POST['brani']) && is_array($_POST['brani'])) {
+                        $checked = array_map('intval', $_POST['brani']);
+                        if (!empty($_POST['order'])) {
+                            $order_ids = array_map('intval', explode(',', $_POST['order']));
+                            $checked = array_intersect($order_ids, $checked);
+                        }
+                        $stmt_check = $conn->prepare("SELECT Id FROM Brani WHERE Id = ?");
+                        $stmt_insert = $conn->prepare("INSERT INTO BraniSuonati (IdBrano, BranoSuonatoIl, OrdineEsecuzione) VALUES (?, ?, ?)");
+                        $inseriti = 0;
+                        $ordine = 1;
+                        foreach ($checked as $id_brano) {
+                            $stmt_check->bind_param('i', $id_brano);
+                            $stmt_check->execute();
+                            if ($stmt_check->get_result()->num_rows > 0) {
+                                $stmt_insert->bind_param('isi', $id_brano, $data, $ordine);
+                                $stmt_insert->execute();
+                                $inseriti++;
+                                $ordine++;
+                            }
+                        }
+                        $_SESSION['message'] = $inseriti . ' brani aggiornati per la scaletta del ' . $dateObj->format('d/m/Y');
+                        $_SESSION['message_type'] = 'success';
+                    } else {
+                        $_SESSION['message'] = 'Nessun brano selezionato';
+                        $_SESSION['message_type'] = 'error';
+                    }
+                } else {
+                    $_SESSION['message'] = 'Nessuna scaletta trovata per questa data';
+                    $_SESSION['message_type'] = 'error';
+                }
+            } else {
+                $_SESSION['message'] = 'Data non valida';
+                $_SESSION['message_type'] = 'error';
+            }
+        }
     } elseif ($action === 'filter_index') {
         // Gestione filtri index.php
         if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
