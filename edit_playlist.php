@@ -127,14 +127,16 @@ while ($r = $res_all->fetch_assoc()) {
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Aggiungi brano</label>
-                        <div class="flex gap-2">
-                            <select id="add-select" class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg">
+                        <div class="flex flex-col md:flex-row gap-2 md:gap-3">
+                            <select id="add-select" class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg text-base min-h-[48px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500">
                                 <option value="">-- Seleziona brano --</option>
-                                <?php foreach ($all_songs as $s): ?>
-                                    <option value="<?php echo $s['id']; ?>"><?php echo sanitize($s['titolo']) . ' — ' . sanitize($s['tipologia']); ?></option>
+                                <?php foreach ($all_songs as $song): ?>
+                                    <option value="<?php echo $song['id']; ?>">
+                                        <?php echo sanitize($song['titolo']); ?> — <?php echo sanitize($song['tipologia']); ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
-                            <button type="button" id="add-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg">Aggiungi</button>
+                            <button type="button" id="add-btn" class="px-4 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[48px] transition-colors select-none">Aggiungi</button>
                         </div>
                     </div>
 
