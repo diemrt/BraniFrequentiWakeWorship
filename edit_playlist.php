@@ -57,17 +57,34 @@ while ($row = $result->fetch_assoc()) {
 
 // Se è stata selezionata una data, carica i brani per quella scaletta
 $selected_date = $_GET['data'] ?? '';
-$selected_brani_ids = [];
+$selected_songs = [];
 if ($selected_date && DateTime::createFromFormat('Y-m-d', $selected_date)) {
-    $result_selected = $conn->prepare("SELECT IdBrano FROM BraniSuonati 
-                                       WHERE BranoSuonatoIl = ? 
-                                       ORDER BY OrdineEsecuzione ASC");
-    $result_selected->bind_param('s', $selected_date);
-    $result_selected->execute();
-    $result_set = $result_selected->get_result();
-    while ($row = $result_set->fetch_assoc()) {
-        $selected_brani_ids[] = $row['IdBrano'];
+    $stmt_sel = $conn->prepare("SELECT bs.IdBrano, bs.OrdineEsecuzione, b.Titolo, b.Tipologia
+                                FROM BraniSuonati bs
+                                JOIN Brani b ON bs.IdBrano = b.Id
+                                WHERE bs.BranoSuonatoIl = ?
+                                ORDER BY bs.OrdineEsecuzione ASC");
+    $stmt_sel->bind_param('s', $selected_date);
+    $stmt_sel->execute();
+    $res_sel = $stmt_sel->get_result();
+    while ($r = $res_sel->fetch_assoc()) {
+        $selected_songs[] = [
+            'id' => $r['IdBrano'],
+            'titolo' => $r['Titolo'],
+            'tipologia' => $r['Tipologia'],
+        ];
     }
+}
+
+// Fetch all songs for the add control
+$all_songs = [];
+$res_all = $conn->query("SELECT Id, Titolo, Tipologia FROM Brani ORDER BY Titolo");
+while ($r = $res_all->fetch_assoc()) {
+    $all_songs[] = [
+        'id' => $r['Id'],
+        'titolo' => $r['Titolo'],
+        'tipologia' => $r['Tipologia']
+    ];
 }
 ?>
 
@@ -107,45 +124,32 @@ if ($selected_date && DateTime::createFromFormat('Y-m-d', $selected_date)) {
                     <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="action" value="edit_playlist">
                     <input type="hidden" name="data" value="<?php echo sanitize($selected_date); ?>">
-                    <input type="hidden" name="order" id="order" value="">
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Modifica Brani (l'ordine di selezione determinerà l'ordine di esecuzione)</label>
-                        <div class="space-y-2">
-                            <?php foreach ($brani as $index => $brano): ?>
-                                <label for="brano_<?php echo $brano['id']; ?>" class="block cursor-pointer">
-                                    <input type="checkbox" name="brani[]" value="<?php echo $brano['id']; ?>" id="brano_<?php echo $brano['id']; ?>" class="hidden peer brano-checkbox" data-order="" <?php echo in_array($brano['id'], $selected_brani_ids) ? 'checked' : ''; ?>>
-                                    <div class="min-h-[48px] p-3 border-2 border-gray-200 rounded-lg peer-checked:border-orange-500 peer-checked:bg-orange-50 active:scale-[0.98] transition-all">
-                                        <div class="font-medium text-sm text-gray-900">
-                                            <?php echo sanitize($brano['titolo']); ?>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-0.5">
-                                            <?php echo sanitize($brano['tipologia']); ?>
-                                        </div>
-                                        <?php if ($brano['warning']): ?>
-                                            <div class="text-xs text-yellow-600 mt-1 flex items-center">
-                                                <svg class="h-3 w-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                                </svg>
-                                                <?php echo $brano['warning']; ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </label>
-                            <?php endforeach; ?>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Aggiungi brano</label>
+                        <div class="flex gap-2">
+                            <select id="add-select" class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg">
+                                <option value="">-- Seleziona brano --</option>
+                                <?php foreach ($all_songs as $s): ?>
+                                    <option value="<?php echo $s['id']; ?>"><?php echo sanitize($s['titolo']) . ' — ' . sanitize($s['tipologia']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" id="add-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg">Aggiungi</button>
                         </div>
                     </div>
-                </form>
 
-                <!-- Fixed Bottom Button (Above Mobile Nav) -->
-                <div class="fixed bottom-20 md:bottom-4 left-0 right-0 px-3 z-50">
-                    <button type="submit" form="playlist-form" class="w-full flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg text-white bg-orange-600 hover:bg-orange-700 active:bg-orange-800 min-h-[48px] select-none transition-colors shadow-2xl">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Salva Modifica
-                    </button>
-                </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Scaletta (ordine)</label>
+                        <ul id="playlist-list" class="space-y-2">
+                            <!-- Items saranno renderizzati da JS -->
+                        </ul>
+                        <p class="text-xs text-gray-500 mt-2">Usa le frecce per spostare i brani o il pulsante rimuovi per eliminarli.</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg text-white bg-orange-600 hover:bg-orange-700 active:bg-orange-800 min-h-[48px] select-none transition-colors">Salva Modifica</button>
+                    </div>
+                </form>
             <?php elseif ($selected_date && !(count($dates) > 0 && in_array($selected_date, array_column($dates, 'data')))): ?>
                 <div class="mt-6 p-4 rounded-lg bg-red-50 border border-red-200">
                     <p class="text-red-800 text-sm md:text-base">Data non valida o nessun brano trovato per questa scaletta.</p>
@@ -160,26 +164,129 @@ if ($selected_date && DateTime::createFromFormat('Y-m-d', $selected_date)) {
 </div>
 
 <script>
-// Gestione ordine brani - logica semplificata
+// Playlist management: add / remove / reorder and submit brani[] in order
 (function() {
-    var order = [];
-    var orderInput = document.getElementById('order');
-    
-    if (!orderInput) return; // Fallback se l'elemento non esiste
-    
-    var checkboxes = document.querySelectorAll('.brano-checkbox');
-    if (!checkboxes.length) return; // Fallback se non ci sono checkbox
-    
-    checkboxes.forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            if (this.checked) {
-                order.push(this.value);
-            } else {
-                order = order.filter(function(id) { return id !== this.value; }, this);
-            }
-            orderInput.value = order.join(',');
+    var selected = <?php echo json_encode($selected_songs, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?> || [];
+    var allSongs = <?php echo json_encode($all_songs, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?> || [];
+
+    var listEl = document.getElementById('playlist-list');
+    var addSelect = document.getElementById('add-select');
+    var addBtn = document.getElementById('add-btn');
+    var form = document.getElementById('playlist-form');
+
+    function render() {
+        // render list
+        listEl.innerHTML = '';
+        selected.forEach(function(item, idx) {
+            var li = document.createElement('li');
+            li.className = 'p-3 border-2 border-gray-200 rounded-lg flex items-center justify-between';
+            var left = document.createElement('div');
+            left.innerHTML = '<div class="font-medium">' + escapeHtml(item.titolo) + '</div><div class="text-xs text-gray-500">' + escapeHtml(item.tipologia) + '</div>';
+            var controls = document.createElement('div');
+            controls.className = 'flex items-center gap-2';
+
+            var up = document.createElement('button');
+            up.type = 'button';
+            up.className = 'px-2 py-1 bg-gray-100 rounded';
+            up.title = 'Su';
+            up.innerHTML = '↑';
+            up.disabled = idx === 0;
+            up.addEventListener('click', function(){ moveUp(idx); });
+
+            var down = document.createElement('button');
+            down.type = 'button';
+            down.className = 'px-2 py-1 bg-gray-100 rounded';
+            down.title = 'Giù';
+            down.innerHTML = '↓';
+            down.disabled = idx === selected.length - 1;
+            down.addEventListener('click', function(){ moveDown(idx); });
+
+            var remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'px-2 py-1 bg-red-600 text-white rounded';
+            remove.title = 'Rimuovi';
+            remove.innerHTML = 'Rimuovi';
+            remove.addEventListener('click', function(){ removeAt(idx); });
+
+            controls.appendChild(up);
+            controls.appendChild(down);
+            controls.appendChild(remove);
+
+            li.appendChild(left);
+            li.appendChild(controls);
+            listEl.appendChild(li);
         });
-    });
+        refreshAddOptions();
+    }
+
+    function refreshAddOptions() {
+        // remove already selected from add select
+        var selIds = selected.map(function(s){ return String(s.id); });
+        // rebuild options keeping placeholder
+        var html = '<option value="">-- Seleziona brano --</option>';
+        allSongs.forEach(function(s){
+            if (selIds.indexOf(String(s.id)) === -1) {
+                html += '<option value="'+escapeHtml(s.id)+'">'+escapeHtml(s.titolo)+' — '+escapeHtml(s.tipologia)+'</option>';
+            }
+        });
+        addSelect.innerHTML = html;
+    }
+
+    function addSelected() {
+        var val = addSelect.value;
+        if (!val) return;
+        var song = allSongs.find(function(s){ return String(s.id) === String(val); });
+        if (!song) return;
+        selected.push({id: song.id, titolo: song.titolo, tipologia: song.tipologia});
+        render();
+    }
+
+    function moveUp(idx) {
+        if (idx <= 0) return;
+        var tmp = selected[idx-1]; selected[idx-1] = selected[idx]; selected[idx] = tmp;
+        render();
+    }
+    function moveDown(idx) {
+        if (idx >= selected.length-1) return;
+        var tmp = selected[idx+1]; selected[idx+1] = selected[idx]; selected[idx] = tmp;
+        render();
+    }
+    function removeAt(idx) {
+        selected.splice(idx,1);
+        render();
+    }
+
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // submit handler: create hidden inputs brani[] in order
+    if (form) {
+        form.addEventListener('submit', function(e){
+            // remove any existing brani[] inputs
+            var existing = form.querySelectorAll('input[name="brani[]"]');
+            existing.forEach(function(n){ n.parentNode.removeChild(n); });
+            // append in order
+            selected.forEach(function(item){
+                var inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'brani[]';
+                inp.value = item.id;
+                form.appendChild(inp);
+            });
+        });
+    }
+
+    if (addBtn) addBtn.addEventListener('click', addSelected);
+
+    // initial render
+    render();
 })();
 </script>
 
