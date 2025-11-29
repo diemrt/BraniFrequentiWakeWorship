@@ -19,7 +19,7 @@ if ($message) {
 // Ottieni tutte le date uniche di scalette passate dai dati in BraniSuonati
 $result_dates = $conn->query("SELECT DISTINCT BranoSuonatoIl 
                                FROM BraniSuonati 
-                               WHERE BranoSuonatoIl <= CURDATE()
+                               WHERE BranoSuonatoIl IS NOT NULL
                                ORDER BY BranoSuonatoIl DESC");
 $dates = [];
 while ($row = $result_dates->fetch_assoc()) {
