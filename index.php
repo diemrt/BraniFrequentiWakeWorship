@@ -18,6 +18,7 @@ $filters_open = $_SESSION['filters_open'] ?? false;
 // Ottieni parametri di ricerca
 $title_search = $_GET['title'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
+$date_from = (empty($date_from) && !is_logged_in()) ? date('Y-m-d') : $date_from;
 $date_to = $_GET['date_to'] ?? '';
 $day_filter = $_GET['day'] ?? 'entrambi';
 
@@ -172,7 +173,7 @@ foreach ($brani as $brano) {
 
 <?php include 'includes/header.php'; ?>
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Ultimi Brani Suonati</h1>
+    <h1 class="text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Lista Brani Suonati</h1>
     
     <?php if ($message): ?>
         <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
@@ -334,14 +335,16 @@ foreach ($brani as $brano) {
                 <!-- Action Buttons -->
                 <div class="flex gap-2 mb-4 flex-wrap">
                     <?php if ($date >= $today): ?>
-                        <a href="index.php?copy_date=<?php echo urlencode($date); ?>&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
-                           class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
-                           title="Condividi o copia scaletta">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                            </svg>
-                            <span class="hidden md:inline">Copia</span>
-                        </a>
+                        <?php if (is_logged_in()): ?>
+                            <a href="index.php?copy_date=<?php echo urlencode($date); ?>&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
+                               class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
+                               title="Condividi o copia scaletta">
+                                <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="hidden md:inline">Copia</span>
+                            </a>
+                        <?php endif; ?>
                         <?php if (is_logged_in()): ?>
                             <a href="index.php?confirm_delete=<?php echo urlencode($date); ?>&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>" 
                                class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none" 
