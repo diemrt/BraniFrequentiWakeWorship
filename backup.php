@@ -59,6 +59,9 @@ if (isset($_POST['download_backup'])) {
             $csv_file = $temp_dir . '/' . $table_name . '.csv';
             $fp = fopen($csv_file, 'w');
             
+            // Aggiungi BOM UTF-8 per compatibilità con Excel
+            fprintf($fp, chr(0xEF).chr(0xBB).chr(0xBF));
+            
             // Scrivi intestazioni
             if ($data_result->num_rows > 0) {
                 $first_row = $data_result->fetch_assoc();
