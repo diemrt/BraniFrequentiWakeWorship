@@ -153,16 +153,6 @@
                     </svg>
                     <span class="text-xs mt-1">Utenti</span>
                 </a>
-
-                <?php if (can_access_backup()): ?>
-                    <a href="navigate.php?to=backup.php" class="nav-tab flex flex-col items-center justify-center flex-1 text-gray-600 hover:bg-gray-50 transition-colors <?php echo basename($_SERVER['PHP_SELF']) === 'backup.php' ? 'text-orange-600 border-t-2 border-orange-600' : ''; ?>">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                        </svg>
-                        <span class="text-xs mt-1">Backup</span>
-                    </a>
-                <?php endif; ?>
-
                 <a href="navigate.php?to=logout.php" class="nav-tab flex flex-col items-center justify-center flex-1 text-gray-600 hover:bg-gray-50 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
