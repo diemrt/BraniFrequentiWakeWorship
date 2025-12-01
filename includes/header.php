@@ -49,12 +49,25 @@
                             </a>
                         </div>
                     </div>
-                    <a href="navigate.php?to=manage_users.php" class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        <span>Gestisci Utenti</span>
-                    </a>
+                    <div class="relative group">
+                        <a href="navigate.php?to=manage_users.php" class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span>Gestisci Utenti</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                        </a>
+                        <div class="absolute left-0 mt-0 w-48 bg-orange-700 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <a href="navigate.php?to=add_edit_utente.php" class="block px-4 py-3 text-white hover:bg-orange-800 rounded-b transition-colors">
+                                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Aggiungi Utente
+                            </a>
+                        </div>
+                    </div>
                     <?php if (can_access_backup()): ?>
                         <a href="navigate.php?to=backup.php" class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

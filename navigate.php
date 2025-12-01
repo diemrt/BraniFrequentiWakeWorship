@@ -12,6 +12,7 @@ $allowed_pages = [
     'manage_brani.php',
     'add_edit_brano.php',
     'manage_users.php',
+    'add_edit_utente.php',
     'create_playlist.php',
     'edit_playlist.php',
     'backup.php'
