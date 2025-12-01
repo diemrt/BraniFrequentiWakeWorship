@@ -16,12 +16,10 @@
     </head>
 
 <body class="bg-gray-50 text-gray-900 pb-20 md:pb-0 scroll-smooth text-base">
-    <header class="bg-gradient-to-r from-orange-600 to-orange-800 text-white shadow-lg sticky top-0 z-30 will-change-transform">
+    <header class="hidden md:block text-white shadow-lg sticky top-0 z-30 will-change-transform" style="background-color: #F97D27;">
         <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="navigate.php?to=index.php" class="text-lg md:text-xl font-bold flex items-center space-x-2">
-                <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                </svg>
+            <a href="navigate.php?to=index.php" class="text-lg md:text-xl font-bold flex items-center space-x-3">
+                <img src="images/logo-orange.svg" alt="WakeWorship Logo" class="w-8 h-8 md:w-10 md:h-10">
                 <span class="inline">Brani Frequenti - WakeWorship</span>
             </a>
             <div class="hidden md:flex">
