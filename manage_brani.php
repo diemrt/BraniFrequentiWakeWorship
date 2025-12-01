@@ -65,29 +65,31 @@ $result = $stmt->get_result();
 $brani = $result->fetch_all(MYSQLI_ASSOC);
 
 $query_string = http_build_query(['title' => $title_search]);
-
-// Get brano for editing if edit_id is set
-$edit_brano = null;
-if (isset($_GET['edit_id'])) {
-    $edit_id = (int)$_GET['edit_id'];
-    $stmt = $conn->prepare("SELECT * FROM Brani WHERE Id = ?");
-    $stmt->bind_param('i', $edit_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $edit_brano = $result->fetch_assoc();
-}
 ?>
 
 <?php include 'includes/header.php'; ?>
 <div class="max-w-6xl mx-auto mt-4 lg:mt-0">
-    <div class="flex items-center mb-4">
-        <svg class="h-6 w-6 text-orange-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
-        </svg>
-
-
-        <h1 class="text-xl font-bold text-gray-900">Gestione brani</h1>
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+            <svg class="h-6 w-6 text-orange-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+            </svg>
+            <h1 class="text-xl font-bold text-gray-900">Gestione brani</h1>
+        </div>
+        <a href="navigate.php?to=add_edit_brano.php" class="hidden md:flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md font-medium transition-colors min-h-[44px] select-none">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            <span>Aggiungi brano</span>
+        </a>
     </div>
+
+    <a href="navigate.php?to=add_edit_brano.php" class="md:hidden mb-4 flex items-center justify-center px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors min-h-[48px] select-none">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span>Aggiungi brano</span>
+    </a>
 
     <?php if ($message): ?>
         <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
@@ -167,7 +169,7 @@ if (isset($_GET['edit_id'])) {
 
                 <!-- Action Buttons - Always Visible -->
                 <div class="flex gap-2 mt-3">
-                    <a href="?edit_id=<?php echo $brano['Id']; ?>&title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>"
+                    <a href="navigate.php?to=add_edit_brano.php?id=<?php echo $brano['Id']; ?>"
                         class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm min-h-[44px] select-none">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -213,70 +215,6 @@ if (isset($_GET['edit_id'])) {
         <?php endif; ?>
     </div>
 <?php endif; ?>
-
-<!-- Add/Edit Form -->
-<div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-6" id="branoForm">
-    <div class="flex items-center mb-4">
-        <svg class="h-6 w-6 text-orange-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-        </svg>
-
-
-        <h2 class="text-xl font-bold text-gray-900"><?php echo $edit_brano ? 'Modifica' : 'Aggiungi'; ?> brano</h2>
-    </div>
-    <form method="post" action="loading.php">
-        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
-        <input type="hidden" name="action" value="manage_brani">
-        <input type="hidden" name="title_search" value="<?php echo sanitize($title_search); ?>">
-        <input type="hidden" name="page" value="<?php echo $page; ?>">
-        <?php if ($edit_brano): ?>
-            <input type="hidden" name="id" value="<?php echo $edit_brano['Id']; ?>">
-        <?php endif; ?>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-                <label for="titolo" class="block text-sm font-medium text-gray-700 mb-2">Titolo</label>
-                <input type="text" name="titolo" id="titolo" placeholder="Titolo del brano"
-                    value="<?php echo $edit_brano ? sanitize($edit_brano['Titolo']) : ''; ?>"
-                    class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]"
-                    required>
-            </div>
-            <div>
-                <label for="tipologia" class="block text-sm font-medium text-gray-700 mb-2">Tipologia</label>
-                <select name="tipologia" id="tipologia"
-                    class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]"
-                    required>
-                    <option value="Lode" <?php echo ($edit_brano && $edit_brano['Tipologia'] == 'Lode') ? 'selected' : ''; ?>>Lode</option>
-                    <option value="Adorazione" <?php echo ($edit_brano && $edit_brano['Tipologia'] == 'Adorazione') ? 'selected' : ''; ?>>Adorazione</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="flex flex-col md:flex-row gap-3">
-            <?php if ($edit_brano): ?>
-                <button type="submit" name="edit"
-                    class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span>Salva Modifiche</span>
-                </button>
-                <a href="manage_brani.php?title=<?php echo urlencode($title_search); ?>&page=<?php echo $page; ?>"
-                    class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none text-center">
-                    Annulla
-                </a>
-            <?php else: ?>
-                <button type="submit" name="add"
-                    class="flex-1 md:flex-initial flex items-center justify-center px-4 py-3 md:py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg md:rounded-md font-medium transition-colors min-h-[44px] min-w-[44px] select-none">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    <span>Aggiungi</span>
-                </button>
-            <?php endif; ?>
-        </div>
-    </form>
-</div>
 </div>
 
 <?php include 'includes/footer.php'; ?>
