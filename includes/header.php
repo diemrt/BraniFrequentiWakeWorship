@@ -81,15 +81,28 @@
 
     <!-- Mobile Header -->
     <div class="lg:hidden">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center space-x-3">
-                <img src="images/logo.svg" alt="WakeWorship Logo" class="w-10 h-10">
-                <div>
-                    <h1 class="text-2xl font-bold" style="color: #F97D27;">Brani Frequenti</h1>
-                    <p class="text-xs font-bold text-gray-500" style="color: #F97D27;">WakeWorship</p>
+        <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
+            <!-- Full header for index.php -->
+            <div class="container mx-auto px-4 py-5">
+                <div class="flex items-center space-x-3">
+                    <img src="images/logo-orange.svg" alt="WakeWorship Logo" class="w-12 h-12 rounded-lg shadow-sm">
+                    <div>
+                        <h1 class="text-xl font-bold" style="color: #F97D27;">Brani Frequenti</h1>
+                        <p class="text-sm text-gray-600">WakeWorship</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php else: ?>
+            <!-- Compact header for other pages -->
+            <div class="bg-white border-b border-gray-200">
+                <div class="container mx-auto px-4 py-3">
+                    <a href="navigate.php?to=index.php" class="flex items-center space-x-2">
+                        <img src="images/logo-orange.svg" alt="WakeWorship Logo" class="w-8 h-8 rounded-md">
+                        <span class="text-sm font-semibold text-gray-700">Brani Frequenti</span>
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 
 
