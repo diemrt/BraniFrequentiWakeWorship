@@ -174,6 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $date_from = $_POST['date_from'] ?? '';
             $date_to = $_POST['date_to'] ?? '';
             $day = $_POST['day'] ?? 'entrambi';
+            $programmato = $_POST['programmato'] ?? 'false';
             $page = $_POST['page'] ?? 1;
             
             $redirect = 'index.php?' . http_build_query([
@@ -181,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'date_from' => $date_from,
                 'date_to' => $date_to,
                 'day' => $day,
+                'programmato' => $programmato,
                 'page' => $page
             ]);
         }

@@ -18,16 +18,17 @@ $filters_open = $_SESSION['filters_open'] ?? false;
 // Ottieni parametri di ricerca
 $title_search = $_GET['title'] ?? '';
 $date_from = $_GET['date_from'] ?? '';
-$date_from = (empty($date_from) && !is_logged_in()) ? date('Y-m-d') : $date_from;
 $date_to = $_GET['date_to'] ?? '';
 $day_filter = $_GET['day'] ?? 'entrambi';
+$programmato_filter = $_GET['programmato'] ?? (is_logged_in() ? 'false' : 'true');
 
 // Build query string for pagination
 $query_string = http_build_query([
     'title' => $title_search,
     'date_from' => $date_from,
     'date_to' => $date_to,
-    'day' => $day_filter
+    'day' => $day_filter,
+    'programmato' => $programmato_filter
 ]);
 
 $today = date('Y-m-d');
@@ -120,6 +121,15 @@ if ($day_filter == 'venerdi') {
     $base_query = str_replace("IN (6, 1)", "= 1", $base_query);
     $count_query = str_replace("IN (6, 1)", "= 1", $count_query);
     $dates_query = str_replace("IN (6, 1)", "= 1", $dates_query);
+}
+
+if ($programmato_filter == 'true') {
+    $condition = " AND bs.BranoSuonatoIl >= ?";
+    $count_query .= $condition;
+    $dates_query .= $condition;
+    $base_query .= $condition;
+    $params[] = $today;
+    $types .= 's';
 }
 $stmt_count = $conn->prepare($count_query);
 if (!empty($params)) {
@@ -294,20 +304,31 @@ unset($brani_per_data);
                 </div>
 
                 <div class="pt-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per giorno</label>
-                    <div class="grid grid-cols-3 gap-2 md:flex md:gap-2">
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> class="sr-only peer">
-                            <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Venerdì</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> class="sr-only peer">
-                            <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Domenica</span>
-                        </label>
-                        <label class="flex items-center cursor-pointer">
-                            <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> class="sr-only peer">
-                            <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Entrambi</span>
-                        </label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per giorno</label>
+                            <div class="grid grid-cols-3 gap-2 md:flex md:gap-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="day" value="venerdi" <?php echo $day_filter == 'venerdi' ? 'checked' : ''; ?> class="sr-only peer">
+                                    <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'venerdi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Venerdì</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="day" value="dom" <?php echo $day_filter == 'dom' ? 'checked' : ''; ?> class="sr-only peer">
+                                    <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'dom' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Domenica</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="day" value="entrambi" <?php echo $day_filter == 'entrambi' ? 'checked' : ''; ?> class="sr-only peer">
+                                    <span class="block w-full text-center px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $day_filter == 'entrambi' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Entrambi</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Filtra per stato</label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" name="programmato" value="true" <?php echo $programmato_filter == 'true' ? 'checked' : ''; ?> class="sr-only peer">
+                                <span class="block px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-700 transition-all duration-200 peer-checked:bg-orange-100 peer-checked:border-orange-500 peer-checked:text-orange-700 peer-checked:font-medium peer-checked:shadow-sm active:scale-95 touch-manipulation select-none <?php echo $programmato_filter == 'true' ? 'bg-orange-100 border-orange-500 text-orange-700 font-medium shadow-sm' : 'hover:bg-gray-50 hover:border-gray-400'; ?>">Solo programmati</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
