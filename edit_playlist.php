@@ -56,7 +56,7 @@ while ($row = $result->fetch_assoc()) {
 }
 
 // Se è stata selezionata una data, carica i brani per quella scaletta
-$selected_date = $_GET['data'] ?? '';
+$selected_date = $_GET['date'] ?? $_GET['data'] ?? '';
 $selected_songs = [];
 if ($selected_date && DateTime::createFromFormat('Y-m-d', $selected_date)) {
     $stmt_sel = $conn->prepare("SELECT bs.IdBrano, bs.OrdineEsecuzione, b.Titolo, b.Tipologia
@@ -119,7 +119,7 @@ while ($r = $res_all->fetch_assoc()) {
                 </div>
             </form>
 
-            <?php if ($selected_date && count($dates) > 0 && in_array($selected_date, array_column($dates, 'data'))): ?>
+            <?php if ($selected_date && !empty($selected_songs)): ?>
                 <form method="post" class="space-y-4" id="playlist-form" action="loading.php">
                     <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                     <input type="hidden" name="action" value="edit_playlist">
@@ -152,9 +152,9 @@ while ($r = $res_all->fetch_assoc()) {
                         <button type="submit" class="w-full flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg text-white bg-orange-600 hover:bg-orange-700 active:bg-orange-800 min-h-[48px] select-none transition-colors">Salva Modifica</button>
                     </div>
                 </form>
-            <?php elseif ($selected_date && !(count($dates) > 0 && in_array($selected_date, array_column($dates, 'data')))): ?>
+            <?php elseif ($selected_date && empty($selected_songs)): ?>
                 <div class="mt-6 p-4 rounded-lg bg-red-50 border border-red-200">
-                    <p class="text-red-800 text-sm md:text-base">Data non valida o nessun brano trovato per questa scaletta.</p>
+                    <p class="text-red-800 text-sm md:text-base">Nessun brano trovato per questa scaletta.</p>
                 </div>
             <?php elseif (count($dates) === 0): ?>
                 <div class="mt-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">

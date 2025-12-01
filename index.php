@@ -387,6 +387,16 @@ unset($brani_per_data);
                         </a>
                     <?php endif; ?>
                     <?php if (is_logged_in()): ?>
+                        <a href="edit_playlist.php?date=<?php echo urlencode($date); ?>"
+                            class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none"
+                            title="Modifica scaletta">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            <span class="hidden md:inline">Modifica</span>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (is_logged_in()): ?>
                         <a href="index.php?confirm_delete=<?php echo urlencode($date); ?>&<?php echo $query_string; ?>&page=<?php echo $_GET['page'] ?? 1; ?>"
                             class="flex items-center space-x-1 px-3 py-2 md:px-4 md:py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm md:text-base min-h-[44px] min-w-[44px] select-none"
                             title="Elimina scaletta">
