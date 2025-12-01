@@ -172,20 +172,6 @@ foreach ($brani as $brano) {
 ?>
 
 <?php include 'includes/header.php'; ?>
-
-<!-- Mobile Header -->
-<div class="md:hidden">
-    <div class="container mx-auto px-4 py-4">
-        <div class="flex items-center space-x-3">
-            <img src="images/logo.svg" alt="WakeWorship Logo" class="w-10 h-10">
-            <div>
-                <h1 class="text-2xl font-bold" style="color: #F97D27;">Brani Frequenti</h1>
-                <p class="text-xs font-bold text-gray-500" style="color: #F97D27;">WakeWorship</p>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="max-w-6xl mt-8 mx-auto bg-white shadow-lg rounded-lg p-4">
     <div class="flex items-center">
         <svg class="h-6 w-6 text-orange-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
