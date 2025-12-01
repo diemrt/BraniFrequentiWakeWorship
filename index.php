@@ -174,18 +174,20 @@ foreach ($brani as $brano) {
 <?php include 'includes/header.php'; ?>
 
 <!-- Mobile Header -->
-<div class="md:hidden text-white shadow-lg mb-6" style="background-color: #F97D27;">
-    <div class="container mx-auto px-4 py-6">
-        <div class="flex items-center justify-center space-x-3 mb-2">
-            <img src="images/logo-white.svg" alt="WakeWorship Logo" class="w-12 h-12">
+<div class="md:hidden">
+    <div class="container mx-auto px-4 py-4">
+        <div class="flex items-center space-x-3">
+            <img src="images/logo.svg" alt="WakeWorship Logo" class="w-10 h-10">
+            <div>
+                <h1 class="text-2xl font-bold" style="color: #F97D27;">Brani Frequenti</h1>
+                <p class="text-xs font-bold text-gray-500" style="color: #F97D27;">WakeWorship</p>
+            </div>
         </div>
-        <h1 class="text-2xl font-bold text-center">Brani Frequenti</h1>
-        <p class="text-center text-sm opacity-90 mt-1">WakeWorship</p>
     </div>
 </div>
 
 <div class="max-w-6xl mx-auto">
-    <h1 class="hidden md:block text-3xl md:text-4xl font-bold text-center mb-6 md:mb-8 text-gray-800">Lista Brani Suonati</h1>
+    <h1 class="block text-sm md:text-4xl font-bold mt-8 mb-6 md:mb-8 text-gray-600 md:text-gray-800">Brani suonati</h1>
     
     <?php if ($message): ?>
         <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
