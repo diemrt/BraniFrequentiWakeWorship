@@ -210,7 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = sanitize($_POST['username']);
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm_password'];
-            if (!empty($username) && !empty($password) && $password === $confirm_password) {
+            $ruolo = sanitize($_POST['ruolo']);
+            if (!empty($username) && !empty($password) && $password === $confirm_password && in_array($ruolo, ['Admin', 'Developer', 'User'])) {
                 // Check if username exists
                 $stmt = $conn->prepare("SELECT COUNT(*) FROM Utenti WHERE Username = ?");
                 $stmt->bind_param('s', $username);
@@ -219,8 +220,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $count = $result->fetch_row()[0];
                 if ($count == 0) {
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt = $conn->prepare("INSERT INTO Utenti (Username, Password) VALUES (?, ?)");
-                    $stmt->bind_param('ss', $username, $hashed_password);
+                    $stmt = $conn->prepare("INSERT INTO Utenti (Username, Password, Ruolo) VALUES (?, ?, ?)");
+                    $stmt->bind_param('sss', $username, $hashed_password, $ruolo);
                     $stmt->execute();
                     $_SESSION['message'] = 'Utente aggiunto con successo';
                     $_SESSION['message_type'] = 'success';
@@ -237,7 +238,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = sanitize($_POST['username']);
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm_password'];
-            if (!empty($username)) {
+            $ruolo = sanitize($_POST['ruolo']);
+            if (!empty($username) && in_array($ruolo, ['Admin', 'Developer', 'User'])) {
                 // Check if username exists for other users
                 $stmt = $conn->prepare("SELECT COUNT(*) FROM Utenti WHERE Username = ? AND Id != ?");
                 $stmt->bind_param('si', $username, $id);
@@ -248,8 +250,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!empty($password)) {
                         if ($password === $confirm_password) {
                             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                            $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Password = ? WHERE Id = ?");
-                            $stmt->bind_param('ssi', $username, $hashed_password, $id);
+                            $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Password = ?, Ruolo = ? WHERE Id = ?");
+                            $stmt->bind_param('sssi', $username, $hashed_password, $ruolo, $id);
                             $stmt->execute();
                             $_SESSION['message'] = 'Utente aggiornato con successo';
                             $_SESSION['message_type'] = 'success';
@@ -258,8 +260,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $_SESSION['message_type'] = 'error';
                         }
                     } else {
-                        $stmt = $conn->prepare("UPDATE Utenti SET Username = ? WHERE Id = ?");
-                        $stmt->bind_param('si', $username, $id);
+                        $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Ruolo = ? WHERE Id = ?");
+                        $stmt->bind_param('ssi', $username, $ruolo, $id);
                         $stmt->execute();
                         $_SESSION['message'] = 'Utente aggiornato con successo';
                         $_SESSION['message_type'] = 'success';

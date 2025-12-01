@@ -45,7 +45,7 @@ $result = $conn->query("SELECT COUNT(*) FROM Utenti");
 $total = $result->fetch_row()[0];
 $total_pages = ceil($total / $limit);
 
-$stmt = $conn->prepare("SELECT Id, Username FROM Utenti ORDER BY Username LIMIT ? OFFSET ?");
+$stmt = $conn->prepare("SELECT Id, Username, Ruolo FROM Utenti ORDER BY Username LIMIT ? OFFSET ?");
 $stmt->bind_param('ii', $limit, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -102,6 +102,14 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div class="flex-1 min-w-0">
                             <h3 class="text-sm md:text-base font-semibold text-gray-900 break-words"><?php echo sanitize($utente['Username']); ?></h3>
+                            <span class="inline-block mt-2 px-2 py-1 text-xs font-medium rounded-full 
+                                <?php 
+                                    echo $utente['Ruolo'] === 'Admin' ? 'bg-purple-100 text-purple-800' : 
+                                        ($utente['Ruolo'] === 'Developer' ? 'bg-blue-100 text-blue-800' : 
+                                        'bg-gray-100 text-gray-800'); 
+                                ?>">
+                                <?php echo sanitize($utente['Ruolo']); ?>
+                            </span>
                         </div>
                     </div>
 
@@ -172,7 +180,7 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
                 <input type="hidden" name="id" value="<?php echo $edit_utente['Id']; ?>">
             <?php endif; ?>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
                     <input type="text" name="username" id="username" placeholder="Username"
@@ -180,6 +188,19 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
                         class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]"
                         required>
                 </div>
+                <div>
+                    <label for="ruolo" class="block text-sm font-medium text-gray-700 mb-2">Ruolo</label>
+                    <select name="ruolo" id="ruolo"
+                        class="w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 text-base min-h-[44px]"
+                        required>
+                        <option value="User" <?php echo ($edit_utente && $edit_utente['Ruolo'] === 'User') ? 'selected' : ''; ?>>User</option>
+                        <option value="Developer" <?php echo ($edit_utente && $edit_utente['Ruolo'] === 'Developer') ? 'selected' : ''; ?>>Developer</option>
+                        <option value="Admin" <?php echo ($edit_utente && $edit_utente['Ruolo'] === 'Admin') ? 'selected' : ''; ?>>Admin</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password<?php echo $edit_utente ? ' (lascia vuoto per non modificare)' : ''; ?></label>
                     <input type="password" name="password" id="password" placeholder="Password"

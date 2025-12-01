@@ -12,7 +12,8 @@ $allowed_pages = [
     'manage_brani.php',
     'manage_users.php',
     'create_playlist.php',
-    'edit_playlist.php'
+    'edit_playlist.php',
+    'backup.php'
 ];
 
 // Extract base page without query string

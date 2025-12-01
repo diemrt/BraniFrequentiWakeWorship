@@ -36,6 +36,14 @@
                         </svg>
                         <span>Gestisci Utenti</span>
                     </a>
+                    <?php if (can_access_backup()): ?>
+                        <a href="navigate.php?to=backup.php" class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            <span>Backup DB</span>
+                        </a>
+                    <?php endif; ?>
                     <div class="relative group">
                         <button class="flex items-center space-x-1 hover:bg-orange-700 px-3 py-2 rounded transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +154,15 @@
                     <span class="text-xs mt-1">Utenti</span>
                 </a>
 
+                <?php if (can_access_backup()): ?>
+                    <a href="navigate.php?to=backup.php" class="nav-tab flex flex-col items-center justify-center flex-1 text-gray-600 hover:bg-gray-50 transition-colors <?php echo basename($_SERVER['PHP_SELF']) === 'backup.php' ? 'text-orange-600 border-t-2 border-orange-600' : ''; ?>">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span class="text-xs mt-1">Backup</span>
+                    </a>
+                <?php endif; ?>
+
                 <a href="navigate.php?to=logout.php" class="nav-tab flex flex-col items-center justify-center flex-1 text-gray-600 hover:bg-gray-50 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -164,3 +181,31 @@
     </nav>
 
     <main class="container mx-auto px-4 py-4 md:py-6">
+        <?php
+        // Alert backup mensile - solo il primo giorno del mese per Admin e Developer
+        //&& date('j') == 1
+        if (is_logged_in() && can_access_backup()):
+        ?>
+            <div class="max-w-6xl mx-auto mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-start space-x-3 flex-1">
+                        <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <h3 class="text-yellow-900 font-semibold mb-1">Promemoria Backup Mensile</h3>
+                            <p class="text-yellow-800 text-sm">
+                                È il primo giorno del mese! Ricordati di effettuare un backup del database per garantire la sicurezza dei dati.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="navigate.php?to=backup.php" 
+                       class="w-full md:w-auto flex items-center justify-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors min-h-[44px] select-none">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Vai al Backup
+                    </a>
+                </div>
+            </div>
+        <?php endif; ?>
