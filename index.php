@@ -160,7 +160,7 @@ if (!empty($dates)) {
     $brani = [];
 }
 
-// Raggruppa i brani per data
+// Raggruppa i brani per data e gestisci l'ordine di esecuzione
 $grouped = [];
 foreach ($brani as $brano) {
     $date = $brano['BranoSuonatoIl'];
@@ -169,6 +169,19 @@ foreach ($brani as $brano) {
     }
     $grouped[$date][] = $brano;
 }
+
+// Assegna un ordine progressivo se mancante
+foreach ($grouped as $date => &$brani_per_data) {
+    $ordine = 1;
+    foreach ($brani_per_data as &$brano) {
+        if (empty($brano['OrdineEsecuzione']) || $brano['OrdineEsecuzione'] === null) {
+            $brano['OrdineEsecuzione'] = $ordine;
+        }
+        $ordine++;
+    }
+    unset($brano);
+}
+unset($brani_per_data);
 ?>
 
 <?php include 'includes/header.php'; ?>
@@ -370,9 +383,9 @@ foreach ($brani as $brano) {
                 <?php foreach ($brani_per_data as $brano): ?>
                     <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 md:p-6 border border-gray-200">
                         <div class="flex items-start gap-3">
-                            <svg class="w-6 h-6 md:w-8 md:h-8 text-orange-600 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
-                            </svg>
+                            <div class="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 bg-orange-600 text-white rounded-full flex items-center justify-center font-bold text-sm md:text-base">
+                                #<?php echo sanitize($brano['OrdineEsecuzione']); ?>
+                            </div>
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-sm md:text-base font-semibold text-gray-800 break-words"><?php echo sanitize($brano['titolo']); ?></h3>
                                 <p class="text-xs md:text-sm text-gray-600 mt-1"><?php echo sanitize($brano['tipologia']); ?></p>
