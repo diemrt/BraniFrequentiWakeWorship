@@ -183,8 +183,7 @@
     <main class="container mx-auto px-4 py-4 md:py-6">
         <?php
         // Alert backup mensile - solo il primo giorno del mese per Admin e Developer
-        //&& date('j') == 1
-        if (is_logged_in() && can_access_backup()):
+        if (is_logged_in() && can_access_backup() && date('j') == 1):
         ?>
             <div class="max-w-6xl mx-auto mb-6 p-4 rounded-lg bg-yellow-50 border border-yellow-200">
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
