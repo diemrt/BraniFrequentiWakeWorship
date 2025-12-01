@@ -12,7 +12,7 @@ if ($error) {
 ?>
 
 <?php include 'includes/header.php'; ?>
-<div class="flex items-center justify-center bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-center bg-gray-50 mt-4 lg:mt-0 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-6">
         <div>
             <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-orange-100">

@@ -44,7 +44,7 @@ while ($row = $result->fetch_assoc()) {
 ?>
 
 <?php include 'includes/header.php'; ?>
-<div class="container mx-auto px-3 py-4 pb-32 md:pb-8">
+<div class="container mx-auto px-3 mt-4 lg:mt-0 pb-32 md:pb-8">
     <div class="max-w-2xl mx-auto">
         <?php if ($message): ?>
             <div class="mb-6 p-4 rounded-lg <?php echo $message_type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'; ?>">
