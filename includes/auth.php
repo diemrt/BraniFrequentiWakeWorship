@@ -47,4 +47,8 @@ function can_access_backup() {
     $role = get_user_role();
     return in_array($role, ['Admin', 'Developer']);
 }
+
+function is_admin() {
+    return get_user_role() === 'Admin';
+}
 ?>

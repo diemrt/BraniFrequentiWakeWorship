@@ -22,6 +22,12 @@ $offset = ($page - 1) * $limit;
 
 // Handle delete confirmation request
 if (isset($_GET['confirm_delete'])) {
+    if (!is_admin()) {
+        $_SESSION['message'] = 'Solo gli Admin possono eliminare gli utenti';
+        $_SESSION['message_type'] = 'error';
+        header('Location: manage_users.php?page=' . $page);
+        exit;
+    }
     $id = (int)$_GET['confirm_delete'];
     $stmt = $conn->prepare("SELECT Username FROM Utenti WHERE Id = ?");
     $stmt->bind_param('i', $id);
@@ -33,6 +39,12 @@ if (isset($_GET['confirm_delete'])) {
 // Get utente for editing if edit_id is set
 $edit_utente = null;
 if (isset($_GET['edit_id'])) {
+    if (!is_admin()) {
+        $_SESSION['message'] = 'Solo gli Admin possono modificare gli utenti';
+        $_SESSION['message_type'] = 'error';
+        header('Location: manage_users.php?page=' . $page);
+        exit;
+    }
     $edit_id = (int)$_GET['edit_id'];
     $stmt = $conn->prepare("SELECT * FROM Utenti WHERE Id = ?");
     $stmt->bind_param('i', $edit_id);
@@ -114,6 +126,7 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
                     </div>
 
                     <!-- Action Buttons - Always Visible -->
+                    <?php if (is_admin()): ?>
                     <div class="flex gap-2 mt-3">
                         <a href="?edit_id=<?php echo $utente['Id']; ?>&page=<?php echo $page; ?>"
                             class="flex-1 flex items-center justify-center space-x-1 px-3 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors text-sm min-h-[44px] select-none">
@@ -130,6 +143,11 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
                             <span>Elimina</span>
                         </a>
                     </div>
+                    <?php else: ?>
+                    <div class="mt-3 px-3 py-2 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
+                        Solo gli Admin possono modificare o eliminare utenti
+                    </div>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -163,6 +181,7 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
     <?php endif; ?>
 
     <!-- Add/Edit Form -->
+    <?php if (is_admin()): ?>
     <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4 md:p-6" id="utenteForm">
         <div class="flex items-center mb-4">
             <svg class="h-6 w-6 text-orange-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -240,6 +259,7 @@ $utenti = $result->fetch_all(MYSQLI_ASSOC);
             </div>
         </form>
     </div>
+    <?php endif; ?>
 </div>
 
 <?php include 'includes/footer.php'; ?>

@@ -236,45 +236,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['message_type'] = 'error';
             }
         } elseif (isset($_POST['edit'])) {
-            $id = (int)$_POST['id'];
-            $username = sanitize($_POST['username']);
-            $password = $_POST['password'];
-            $confirm_password = $_POST['confirm_password'];
-            $ruolo = sanitize($_POST['ruolo']);
-            if (!empty($username) && in_array($ruolo, ['Admin', 'Developer', 'User'])) {
-                // Check if username exists for other users
-                $stmt = $conn->prepare("SELECT COUNT(*) FROM Utenti WHERE Username = ? AND Id != ?");
-                $stmt->bind_param('si', $username, $id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $count = $result->fetch_row()[0];
-                if ($count == 0) {
-                    if (!empty($password)) {
-                        if ($password === $confirm_password) {
-                            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                            $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Password = ?, Ruolo = ? WHERE Id = ?");
-                            $stmt->bind_param('sssi', $username, $hashed_password, $ruolo, $id);
+            if (!is_admin()) {
+                $_SESSION['message'] = 'Solo gli Admin possono modificare gli utenti';
+                $_SESSION['message_type'] = 'error';
+            } else {
+                $id = (int)$_POST['id'];
+                $username = sanitize($_POST['username']);
+                $password = $_POST['password'];
+                $confirm_password = $_POST['confirm_password'];
+                $ruolo = sanitize($_POST['ruolo']);
+                if (!empty($username) && in_array($ruolo, ['Admin', 'Developer', 'User'])) {
+                    // Check if username exists for other users
+                    $stmt = $conn->prepare("SELECT COUNT(*) FROM Utenti WHERE Username = ? AND Id != ?");
+                    $stmt->bind_param('si', $username, $id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $count = $result->fetch_row()[0];
+                    if ($count == 0) {
+                        // Update password only if both fields are filled and match
+                        if (!empty($password) && !empty($confirm_password)) {
+                            if ($password === $confirm_password) {
+                                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                                $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Password = ?, Ruolo = ? WHERE Id = ?");
+                                $stmt->bind_param('sssi', $username, $hashed_password, $ruolo, $id);
+                                $stmt->execute();
+                                $_SESSION['message'] = 'Utente aggiornato con successo';
+                                $_SESSION['message_type'] = 'success';
+                            } else {
+                                $_SESSION['message'] = 'Password non corrispondenti';
+                                $_SESSION['message_type'] = 'error';
+                            }
+                        } else {
+                            // Update without changing password
+                            $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Ruolo = ? WHERE Id = ?");
+                            $stmt->bind_param('ssi', $username, $ruolo, $id);
                             $stmt->execute();
                             $_SESSION['message'] = 'Utente aggiornato con successo';
                             $_SESSION['message_type'] = 'success';
-                        } else {
-                            $_SESSION['message'] = 'Password non corrispondenti';
-                            $_SESSION['message_type'] = 'error';
                         }
                     } else {
-                        $stmt = $conn->prepare("UPDATE Utenti SET Username = ?, Ruolo = ? WHERE Id = ?");
-                        $stmt->bind_param('ssi', $username, $ruolo, $id);
-                        $stmt->execute();
-                        $_SESSION['message'] = 'Utente aggiornato con successo';
-                        $_SESSION['message_type'] = 'success';
+                        $_SESSION['message'] = 'Username già esistente';
+                        $_SESSION['message_type'] = 'error';
                     }
                 } else {
-                    $_SESSION['message'] = 'Username già esistente';
+                    $_SESSION['message'] = 'Dati invalidi';
                     $_SESSION['message_type'] = 'error';
                 }
-            } else {
-                $_SESSION['message'] = 'Dati invalidi';
-                $_SESSION['message_type'] = 'error';
             }
         }
     }
@@ -328,11 +335,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $redirect = 'manage_users.php?page=' . $page;
         
         if ($confirmed) {
-            $stmt = $conn->prepare("DELETE FROM Utenti WHERE Id = ?");
-            $stmt->bind_param('i', $id);
-            $stmt->execute();
-            $_SESSION['message'] = 'Utente eliminato con successo';
-            $_SESSION['message_type'] = 'success';
+            if (!is_admin()) {
+                $_SESSION['message'] = 'Solo gli Admin possono eliminare gli utenti';
+                $_SESSION['message_type'] = 'error';
+            } else {
+                $stmt = $conn->prepare("DELETE FROM Utenti WHERE Id = ?");
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $_SESSION['message'] = 'Utente eliminato con successo';
+                $_SESSION['message_type'] = 'success';
+            }
         }
     }
 }
